@@ -62,7 +62,7 @@
                 android:layout_height="wrap_content"
                 android:background="#aeffffff"
                 android:ems="10"
-                android:hint="Login"
+                android:hint="Email"
                 android:textCursorDrawable="@color/colorPrimary"
                 android:inputType="textPersonName"
                 android:textColorHint="#95333333"
@@ -117,6 +117,82 @@
         app:layout_constraintTop_toTopOf="parent">
 
 
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <EditText
+                android:id="@+id/registerEmail"
+                android:layout_width="225dp"
+                android:layout_height="wrap_content"
+                android:background="#aeffffff"
+                android:ems="10"
+                android:hint="Email"
+                android:textCursorDrawable="@color/colorPrimary"
+                android:inputType="textEmailAddress"
+                android:textColorHint="#95333333"
+                android:padding="10dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <EditText
+                android:id="@+id/registerName"
+                android:layout_width="225dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:background="#aeffffff"
+                android:ems="10"
+                android:hint="Name"
+                android:textCursorDrawable="@color/colorPrimary"
+                android:inputType="textPersonName"
+                android:textColorHint="#95333333"
+                android:padding="10dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/registerEmail" />
+
+            <EditText
+                android:id="@+id/registerPassword"
+                android:layout_width="225dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:background="#aeffffff"
+                android:textCursorDrawable="@color/colorPrimary"
+                android:ems="10"
+                android:hint="Password"
+                android:textColorHint="#95333333"
+                android:inputType="textPassword"
+                android:padding="10dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/registerName" />
+
+            <Button
+                android:id="@+id/registerButton"
+                android:layout_width="225dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:text="Sign In"
+                android:background="#ae070d69"
+                android:textColor="#ffffff"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/registerPassword" />
+        </android.support.constraint.ConstraintLayout>
+
     </android.support.constraint.ConstraintLayout>
 
 
@@ -134,7 +210,7 @@
 
         <Button
             android:id="@+id/openSignIn"
-            android:layout_width="125dp"
+            android:layout_width="225dp"
             android:layout_height="40dp"
             android:layout_marginBottom="3dp"
             android:background="#d1070d69"
@@ -147,7 +223,7 @@
 
         <Button
             android:id="@+id/openRegistration"
-            android:layout_width="125dp"
+            android:layout_width="225dp"
             android:layout_height="40dp"
             android:layout_marginBottom="8dp"
             android:background="#d1070d69"
