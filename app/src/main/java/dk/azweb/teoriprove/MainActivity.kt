@@ -29,6 +29,7 @@ class MainActivity : AppCompatActivity() {
         sharedpreferences = getSharedPreferences(Preference,Context.MODE_PRIVATE)
         TOKEN = sharedpreferences.getString("token",null)
         supportActionBar!!.hide()
+        ActionBar.hide()
         if(TOKEN!=null)
             Home()
         signIn.setOnClickListener {
@@ -63,7 +64,7 @@ class MainActivity : AppCompatActivity() {
         var newTag = fragment.toString()
         newTag = Regex("(.*)Fragment.*").replace(newTag,"$1")
         if(newTag != currentTag) {
-            transaction.setCustomAnimations(R.anim.abc_fade_in, 0)
+            transaction.setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_enter, R.anim.pop_exit)
             transaction.replace(R.id.content, fragment)
             transaction.addToBackStack(null)
             transaction.commit()

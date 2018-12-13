@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import com.android.volley.Request
 import com.android.volley.Response
@@ -26,6 +27,7 @@ class HomeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
         supportActionBar!!.hide()
+        ActionBar.hide()
         sharedpreferences = getSharedPreferences(Preference, Context.MODE_PRIVATE)
         val TOKEN = sharedpreferences.getString("token",null)
 
@@ -99,7 +101,7 @@ class HomeActivity : AppCompatActivity() {
         if(newTag != currentTag) {
             Toast.makeText(this@HomeActivity,"click olundu",Toast.LENGTH_SHORT).show()
             transaction.setCustomAnimations(R.anim.abc_fade_in, 0)
-            transaction.replace(R.id.main_frame, fragment)
+            transaction.replace(R.id.content, fragment)
             transaction.addToBackStack(null)
             transaction.commit()
         }
@@ -109,5 +111,12 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
 
+    }
+
+    fun View.show(){
+        this.visibility = View.VISIBLE
+    }
+    fun View.hide(){
+        this.visibility = View.GONE
     }
 }
