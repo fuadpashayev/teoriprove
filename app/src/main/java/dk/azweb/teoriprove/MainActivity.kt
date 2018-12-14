@@ -19,19 +19,17 @@ import com.android.volley.VolleyError
 
 
 class MainActivity : AppCompatActivity() {
-    lateinit var sharedpreferences:SharedPreferences
-    val Preference = "session"
-    var TOKEN:String?=null
     val manager = supportFragmentManager
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        sharedpreferences = getSharedPreferences(Preference,Context.MODE_PRIVATE)
-        TOKEN = sharedpreferences.getString("token",null)
         supportActionBar!!.hide()
         ActionBar.hide()
-        if(TOKEN!=null)
-            Home()
+
+        val loggedIn = intent.extras["loggedIn"] as Boolean
+        if(loggedIn)
+            startActivity(Intent(this,HomeActivity::class.java))
+
         signIn.setOnClickListener {
             LoginFragment().start()
         }
@@ -40,11 +38,6 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-    }
-
-    fun Home(){
-        val intent = Intent(this,HomeActivity::class.java)
-        startActivity(intent)
     }
 
     fun View.show(){

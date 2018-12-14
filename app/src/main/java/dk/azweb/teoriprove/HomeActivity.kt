@@ -21,13 +21,15 @@ class HomeActivity : AppCompatActivity() {
     lateinit var sharedpreferences: SharedPreferences
     val Preference = "session"
     var user:User?=null
-    var category:Category?=null
+    var category:CategoryModel?=null
     val manager = supportFragmentManager
+    var openedFragment = false
+    val fragmentTag = "CATEGORY"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
+        openedFragment = false
         supportActionBar!!.hide()
-        ActionBar.hide()
         sharedpreferences = getSharedPreferences(Preference, Context.MODE_PRIVATE)
         val TOKEN = sharedpreferences.getString("token",null)
 
@@ -49,39 +51,14 @@ class HomeActivity : AppCompatActivity() {
             CategoryFragment().start()
         }
 
-//        getCategory.setOnClickListener {
-//
-//
-//
-//
-//
-//        }
+        startTest.setOnClickListener {
+            ExamFragment().start()
+        }
+
     }
 
 
-//    fun Category(){
-//        val queue = Volley.newRequestQueue(this)
-//            val url = "http://test.azweb.dk/api/category"
-//            val postRequest = object : StringRequest(Request.Method.POST, url,
-//                    Response.Listener { response ->
-//                        category = Category(response)
-//                        for(cat in category!!.categories!!.iterator()){
-//                            Log.d("------id",cat.get("name").toString())
-//                        }
-//
-//                    },
-//                    Response.ErrorListener {
-//                        Log.d("-------Error", "error")
-//                    }
-//            ) {
-//                override fun getHeaders(): MutableMap<String, String> {
-//                    val headers = HashMap<String, String>()
-//                    headers["Accept"] = "application/json"
-//                    return headers
-//                }
-//            }
-//            queue.add(postRequest)
-//    }
+
 
     fun logout(){
         val editor = sharedpreferences.edit()
@@ -99,18 +76,22 @@ class HomeActivity : AppCompatActivity() {
         var newTag = fragment.toString()
         newTag = Regex("(.*)Fragment.*").replace(newTag,"$1")
         if(newTag != currentTag) {
-            Toast.makeText(this@HomeActivity,"click olundu",Toast.LENGTH_SHORT).show()
-            transaction.setCustomAnimations(R.anim.abc_fade_in, 0)
-            transaction.replace(R.id.content, fragment)
+            transaction.setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_enter, R.anim.pop_exit)
+            transaction.replace(R.id.content, fragment,fragmentTag)
             transaction.addToBackStack(null)
             transaction.commit()
+            openedFragment = true
         }
 
     }
 
 
-    override fun onBackPressed() {
 
+
+    override fun onBackPressed() {
+        if(openedFragment)
+            super.onBackPressed()
+        openedFragment = false
     }
 
     fun View.show(){

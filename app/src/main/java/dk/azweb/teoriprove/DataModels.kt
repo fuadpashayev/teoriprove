@@ -25,29 +25,50 @@ class User(data: JSONObject?) {
 
 }
 
-class Category(dataString: String?){
+class CategoryModel(dataString: String?){
 
     var status:String? = null
     var categories:List<HashMap<String,Any>>? = null
     var id:ArrayList<String>? = arrayListOf()
     var name:ArrayList<String>? = arrayListOf()
-    var data:JSONObject
+    var data:JSONObject = JSONObject(dataString)
+
     init {
-        data = JSONObject(dataString)
         status = if(data.has("status")) data.getString("status") else null
         categories = if(data.has("categories")) JSON().parse(data.getString("categories")) else null
 
         for(category in categories!!.iterator()){
-            id!!.add(category.get("id").toString())
-            name!!.add(category.get("name").toString())
+            id!!.add(category["id"].toString())
+            name!!.add(category["name"].toString())
         }
 
     }
 
-    val categorya = object : HashMap<String,Any>(){
+}
+
+class QuestionModel(dataString: String?){
+
+    var status:String? = null
+    var id:ArrayList<String>? = arrayListOf()
+    var text:ArrayList<String>? = arrayListOf()
+    var image_url:ArrayList<String>? = arrayListOf()
+    var audio_url:ArrayList<String>? = arrayListOf()
+
+    var questions:List<HashMap<String,Any>>? = null
+    var data:JSONObject = JSONObject(dataString)
+
+    init {
+        status = if(data.has("status")) data.getString("status") else null
+        questions = if(data.has("questions")) JSON().parse(data.getString("questions")) else null
+
+        for(question in questions!!.iterator()){
+            id!!.add(question["id"].toString())
+            text!!.add(question["text"].toString())
+            image_url!!.add(question["image_url"].toString())
+            audio_url!!.add(question["audio_url"].toString())
+        }
 
     }
-
 
 }
 
