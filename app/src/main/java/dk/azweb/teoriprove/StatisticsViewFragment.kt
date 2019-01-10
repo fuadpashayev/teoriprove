@@ -173,7 +173,7 @@ class StatisticsPagerAdapter(val datas:QuestionModel,val examHeader:TextView,val
 
         container.addView(view)
         return view
-    }//
+    }
 
     fun getState(state:String?):Int{
         val state = state!!.toDouble().toInt()
