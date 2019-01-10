@@ -3,7 +3,6 @@ package dk.azweb.teoriprove
 import android.content.Context
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import com.android.volley.Request
 import com.android.volley.Response
@@ -12,23 +11,32 @@ import com.android.volley.toolbox.Volley
 import kotlinx.android.synthetic.main.activity_main.*
 import org.json.JSONObject
 import android.content.Intent
-import android.content.SharedPreferences
+import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.os.Handler
+import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
-import android.widget.Toast
+import android.support.v4.content.ContextCompat
+import android.widget.TextView
 import com.android.volley.VolleyError
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
     val manager = supportFragmentManager
+    var connectedMessage = true
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         supportActionBar!!.hide()
         ActionBar.hide()
-
+        if(!checkPermission())
+            requestPermission()
         val loggedIn = intent.extras["loggedIn"] as Boolean
         if(loggedIn)
             startActivity(Intent(this,HomeActivity::class.java))
+
+        checkInternetConnection(networkStatus)
 
         signIn.setOnClickListener {
             LoginFragment().start()
@@ -40,12 +48,60 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    fun checkInternetConnection(networkStatusText:TextView){
+        Timer().scheduleAtFixedRate(object : TimerTask() {
+            override fun run() {
+                netWorkMessage(isInternetActive(),networkStatusText)
+            }
+        }, 0, 3000)
+    }
+
+    fun netWorkMessage(status:Boolean, networkStatusText: TextView){
+        if(status){
+            runOnUiThread {
+                if(!connectedMessage) {
+                    networkStatusText.text = "Connected"
+                    networkStatusText.setBackgroundColor(resources.getColor(R.color.green))
+                    networkStatusText.show()
+                    connectedMessage = true
+                    Handler().postDelayed({
+                        networkStatus.hide()
+                    }, 1500)
+                }else{
+                    networkStatusText.hide()
+                }
+            }
+
+        }else{
+            runOnUiThread {
+                networkStatusText.text = "No Internet Connection"
+                networkStatusText.setBackgroundColor(resources.getColor(R.color.red))
+                networkStatusText.show()
+                connectedMessage=false
+            }
+        }
+    }
+    fun isInternetActive():Boolean{
+        val connection = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        if(connection.getNetworkInfo(0).state == android.net.NetworkInfo.State.CONNECTED ||
+                connection.getNetworkInfo(0).state == android.net.NetworkInfo.State.CONNECTING ||
+                connection.getNetworkInfo(1).state == android.net.NetworkInfo.State.CONNECTING ||
+                connection.getNetworkInfo(1).state == android.net.NetworkInfo.State.CONNECTED) {
+            return true
+        }else if(connection.getNetworkInfo(0).state == android.net.NetworkInfo.State.DISCONNECTED ||
+                connection.getNetworkInfo(1).state == android.net.NetworkInfo.State.DISCONNECTED){
+            return false
+        }
+        return false
+    }
+
     fun View.show(){
         this.visibility = View.VISIBLE
     }
     fun View.hide(){
         this.visibility = View.GONE
     }
+
 
 
 
@@ -63,6 +119,15 @@ class MainActivity : AppCompatActivity() {
             transaction.commit()
         }
 
+    }
+
+    fun checkPermission():Boolean{
+        val phoneState = ContextCompat.checkSelfPermission(this,android.Manifest.permission.READ_PHONE_STATE)
+        return phoneState == PackageManager.PERMISSION_GRANTED
+    }
+
+    fun requestPermission(){
+        ActivityCompat.requestPermissions(this,arrayOf(android.Manifest.permission.READ_PHONE_STATE),1)
     }
 
 }

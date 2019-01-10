@@ -65,19 +65,19 @@
                 android:foreground="?selectableItemBackground"
                 android:text="Categories"
                 android:textAllCaps="false"
-                app:layout_constraintBottom_toTopOf="@+id/logout"
+                app:layout_constraintBottom_toTopOf="@+id/statistics"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent" />
 
             <Button
-                android:id="@+id/logout"
+                android:id="@+id/statistics"
                 android:layout_width="235dp"
                 android:layout_height="40dp"
                 android:layout_marginBottom="5dp"
                 android:background="@drawable/button_round"
                 android:foreground="?selectableItemBackground"
-                android:text="Logout"
+                android:text="Statistics"
                 android:textAllCaps="false"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -112,7 +112,19 @@
 
     </android.support.constraint.ConstraintLayout>
 
-
+    <TextView
+        android:id="@+id/networkStatus"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:background="@color/red"
+        android:gravity="center"
+        android:text="No Internet Connection"
+        android:textColor="#ffffff"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 
 </android.support.constraint.ConstraintLayout>

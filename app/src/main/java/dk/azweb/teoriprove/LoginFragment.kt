@@ -51,7 +51,10 @@ class LoginFragment : Fragment() {
                         },
                         Response.ErrorListener {
                             loader.hide()
-                            Toast.makeText(context, "Email or password is incorrect", Toast.LENGTH_SHORT).show()
+                            if(it.message==null)
+                                Toast.makeText(context, "Email or password is incorrect", Toast.LENGTH_SHORT).show()
+                            else
+                                Toast.makeText(context, "No Internet Connection", Toast.LENGTH_SHORT).show()
                         }
                 ) {
                     override fun getParams(): Map<String, String> {

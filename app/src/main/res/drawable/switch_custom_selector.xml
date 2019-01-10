@@ -18,7 +18,7 @@
         </shape>
     </item>
 
-    <item android:state_checked="false">
+    <item android:state_checked="false" android:state_middle="true">
         <shape
             android:shape="rectangle"
             android:visible="true"
