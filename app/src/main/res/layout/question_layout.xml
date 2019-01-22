@@ -18,11 +18,12 @@
         app:layout_constraintVertical_bias="0.0">
 
 
-        <ImageView
+        <pl.droidsonroids.gif.GifImageView
             android:id="@+id/image"
             android:layout_width="match_parent"
             android:layout_height="250dp"
             android:adjustViewBounds="true"
+            android:src="@drawable/loader"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -187,7 +188,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginTop="33dp"
+                    android:layout_marginTop="35dp"
                     android:scaleX="0.9"
                     android:scaleY="0.9"
                     android:visibility="gone"
@@ -218,7 +219,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginTop="33dp"
+                    android:layout_marginTop="35dp"
                     android:scaleX="0.9"
                     android:scaleY="0.9"
                     android:visibility="gone"

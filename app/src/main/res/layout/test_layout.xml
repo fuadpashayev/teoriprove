@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/openTest"
+    android:layout_width="match_parent"
+    android:layout_height="125dp"
+    android:background="@drawable/border_bottom"
+    android:foreground="?selectableItemBackground">
+
+    <pl.droidsonroids.gif.GifImageView
+        android:id="@+id/backgroundImage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop"
+        android:src="@mipmap/loader1" />
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:background="#24000000"
+        android:layout_height="match_parent">
+
+    </android.support.constraint.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/testName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Test Name"
+        android:textColor="#ffffff"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/freeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/border_all_white"
+        android:padding="5dp"
+        android:paddingEnd="10dp"
+        android:paddingStart="10dp"
+        android:text="Free"
+        android:textColor="#ffffff"
+        android:textSize="12sp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toStartOf="@+id/backgroundImage"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/backgroundImage"
+        app:layout_constraintTop_toBottomOf="@+id/testName" />
+</android.support.constraint.ConstraintLayout>

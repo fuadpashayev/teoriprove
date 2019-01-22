@@ -7,7 +7,6 @@
     tools:context=".HomeActivity">
 
 
-
     <android.support.constraint.ConstraintLayout
         android:id="@+id/content"
         android:layout_width="match_parent"
@@ -32,59 +31,60 @@
             app:layout_constraintVertical_bias="0.0"
             app:srcCompat="@mipmap/main_background1" />
 
-        <android.support.constraint.ConstraintLayout
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/testList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#ffffff"
+            android:layout_marginTop="50dp"
+            app:layoutManager="android.support.v7.widget.GridLayoutManager"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+        </android.support.v7.widget.RecyclerView>
+
+    </android.support.constraint.ConstraintLayout>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/ActionBar"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="#ffffff"
+        android:elevation="1dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/openMenu"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_marginEnd="5dp"
+            android:background="?selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:visibility="visible"
+            android:padding="5dp"
+            android:src="@drawable/ic_more"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/examHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="35dp"
+            android:text="Tests"
+            android:textColor="#333333"
+            android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/background"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/background">
-
-
-            <Button
-                android:id="@+id/startTest"
-                android:layout_width="235dp"
-                android:layout_height="40dp"
-                android:layout_marginBottom="5dp"
-                android:background="@drawable/button_round"
-                android:foreground="?selectableItemBackground"
-                android:text="Start Test"
-                android:textAllCaps="false"
-                app:layout_constraintBottom_toTopOf="@+id/categories"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent" />
-
-            <Button
-                android:id="@+id/categories"
-                android:layout_width="235dp"
-                android:layout_height="40dp"
-                android:layout_marginBottom="5dp"
-                android:background="@drawable/button_round"
-                android:foreground="?selectableItemBackground"
-                android:text="Categories"
-                android:textAllCaps="false"
-                app:layout_constraintBottom_toTopOf="@+id/statistics"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent" />
-
-            <Button
-                android:id="@+id/statistics"
-                android:layout_width="235dp"
-                android:layout_height="40dp"
-                android:layout_marginBottom="5dp"
-                android:background="@drawable/button_round"
-                android:foreground="?selectableItemBackground"
-                android:text="Statistics"
-                android:textAllCaps="false"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
-
-        </android.support.constraint.ConstraintLayout>
-
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
     </android.support.constraint.ConstraintLayout>
 
     <android.support.constraint.ConstraintLayout

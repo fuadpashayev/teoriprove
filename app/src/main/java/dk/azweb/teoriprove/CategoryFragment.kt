@@ -31,6 +31,7 @@ import android.widget.ImageView
 class CategoryFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val realActivity = (activity as HomeActivity)
+        realActivity.actionBar.visibility = View.GONE
         val view =  inflater.inflate(R.layout.fragment_category, container, false)
         val manager = fragmentManager
         val queue = Volley.newRequestQueue(context)

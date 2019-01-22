@@ -33,8 +33,7 @@ class MainActivity : AppCompatActivity() {
         if(!checkPermission())
             requestPermission()
         val loggedIn = intent.extras["loggedIn"] as Boolean
-        if(loggedIn)
-            startActivity(Intent(this,HomeActivity::class.java))
+
 
         checkInternetConnection(networkStatus)
 

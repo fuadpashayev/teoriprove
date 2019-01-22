@@ -34,6 +34,7 @@ class CategoryModel(dataString: String?){
     var categories:List<HashMap<String,Any>>? = null
     var id:ArrayList<String>? = arrayListOf()
     var name:ArrayList<String>? = arrayListOf()
+    var image_url:ArrayList<String>? = arrayListOf()
     var data:JSONObject = JSONObject(dataString)
 
     init {
@@ -43,6 +44,7 @@ class CategoryModel(dataString: String?){
         for(category in categories!!.iterator()){
             id!!.add(category["id"].toString())
             name!!.add(category["name"].toString())
+            image_url!!.add(category["image_url"].toString())
         }
 
     }
@@ -62,6 +64,7 @@ class QuestionModel(dataString: String?){
     var sub_text = HashMap<String,ArrayList<String>>()
     var answer = HashMap<String,ArrayList<String>>()
     var user_answer = HashMap<String,ArrayList<String?>>()
+    var correct_answer = HashMap<String,ArrayList<Boolean?>>()
 
     var questions:List<HashMap<String,Any>>? = null
     var sub_questions:ArrayList<Map<String,String>>? = null
@@ -88,18 +91,23 @@ class QuestionModel(dataString: String?){
             sub_text[parent_id] = arrayListOf()
             answer[parent_id] = arrayListOf()
             user_answer[parent_id] = arrayListOf()
+            correct_answer[parent_id] = arrayListOf()
 
             for(sub_question in sub_questions!!.iterator()){
                 val subid = String.format("%f",sub_question["id"])
                 sub_id[parent_id]!!.add(subid)
                 sub_audio_url[parent_id]!!.add(sub_question["audio_url"]!!.toString())
                 sub_text[parent_id]!!.add(sub_question["text"]!!.toString())
-                if(sub_question["answer"]!=null)
-                    answer[parent_id]!!.add(sub_question["answer"].toString())
-                if(sub_question["user_answer"]!=null)
+                answer[parent_id]!!.add(sub_question["answer"].toString())
+                if(sub_question["user_answer"]!=null) {
                     user_answer[parent_id]!!.add(sub_question["user_answer"].toString())
-                else
+                    correct_answer[parent_id]!!.add(sub_question["answer"].toString()==sub_question["user_answer"].toString())
+                }else {
                     user_answer[parent_id]!!.add(null)
+                    correct_answer[parent_id]!!.add(null)
+                }
+
+
             }
         }
 
@@ -131,6 +139,9 @@ class StatisticsModel(dataString: String?){
     }
 
 }
+
+
+
 
 
 

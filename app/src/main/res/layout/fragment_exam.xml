@@ -94,18 +94,18 @@
         android:id="@+id/loader"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#7dffffff"
+        android:background="#ffffff"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ProgressBar
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:indeterminate="true"
-            android:indeterminateTint="@color/colorPrimaryDark"
+        <pl.droidsonroids.gif.GifImageView
+            android:id="@+id/loaderImage"
+            android:layout_width="75dp"
+            android:layout_height="75dp"
+            android:src="@drawable/loader"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"

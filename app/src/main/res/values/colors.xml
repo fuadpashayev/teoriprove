@@ -8,6 +8,7 @@
     <color name="nullBackground">#416e6e6e</color>
     <color name="red">#c1b43434</color>
     <color name="green">#c138ac36</color>
+    <color name="colorNull">#6e6e6e</color>
     <color name="white">#ffffff</color>
     <color name="selected">#e7e7e7</color>
 </resources>

@@ -26,7 +26,7 @@ class SplashActivity : AppCompatActivity() {
 
             Profile(this).getProfile(TOKEN,object:ServerCallback{
                 override fun onSuccess(result: JSONObject?) {
-                    val intent = Intent(this@SplashActivity,MainActivity::class.java)
+                    val intent = Intent(this@SplashActivity,HomeActivity::class.java)
                     intent.putExtra("loggedIn",true)
                     startActivity(intent)
                 }
@@ -34,7 +34,7 @@ class SplashActivity : AppCompatActivity() {
                     val editor = sharedpreferences.edit()
                     editor.remove("token")
                     editor.apply()
-                    val intent = Intent(this@SplashActivity,MainActivity::class.java)
+                    val intent = Intent(this@SplashActivity,HomeActivity::class.java)
                     intent.putExtra("loggedIn",false)
                     startActivity(intent)
                 }
@@ -42,7 +42,7 @@ class SplashActivity : AppCompatActivity() {
 
 
         }else{
-            val intent = Intent(this@SplashActivity,MainActivity::class.java)
+            val intent = Intent(this@SplashActivity,HomeActivity::class.java)
             intent.putExtra("loggedIn",false)
             startActivity(intent)
         }

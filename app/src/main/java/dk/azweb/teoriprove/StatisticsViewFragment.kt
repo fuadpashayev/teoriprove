@@ -6,9 +6,11 @@ import android.content.SharedPreferences
 import android.database.DataSetObserver
 import android.os.Bundle
 import android.support.annotation.Px
+import android.support.constraint.ConstraintLayout
 import android.support.v4.app.Fragment
 import android.support.v4.view.PagerAdapter
 import android.support.v4.view.ViewPager
+import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.telephony.TelephonyManager
@@ -46,8 +48,6 @@ class StatisticsViewFragment : Fragment() {
         phoneManager = context!!.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
         DEVICE_ID = phoneManager.deviceId
         user_id = this.arguments!!.getString("user_id")!!
-        val isFromExam = this.arguments!!.getBoolean("isFromExam")
-        val isFromCategory = this.arguments!!.getBoolean("isFromCategory")
         val session_id = this.arguments!!.getString("session_id")!!
         val queue = Volley.newRequestQueue(context)
         val url = "http://test.azweb.dk/api/answer/statistics/session"
@@ -55,7 +55,7 @@ class StatisticsViewFragment : Fragment() {
                 Response.Listener { response ->
                     Log.d("------response",response.toString())
                     val data = QuestionModel(response)
-                    view.pager.adapter = StatisticsPagerAdapter(data,examHeader,context!!,view.pager)
+                    view.simpleList.adapter = StatisticsSimpleAdapter(data,context!!)
                     view.loader.visibility = View.GONE
                 },
                 Response.ErrorListener {
@@ -80,13 +80,8 @@ class StatisticsViewFragment : Fragment() {
 
 
         view.backButton.setOnClickListener {
-            activity!!.onBackPressed()
-            if(isFromExam)
-                activity!!.onBackPressed()
-            if(isFromCategory)
-                activity!!.onBackPressed()
-
             realActivity.openedFragment = "Statistics"
+            activity!!.onBackPressed()
         }
 
         return view
@@ -94,111 +89,61 @@ class StatisticsViewFragment : Fragment() {
 
 }
 
-class StatisticsPagerAdapter(val datas:QuestionModel,val examHeader:TextView,val context: Context,val list: ViewPager):PagerAdapter(){
-    override fun isViewFromObject(view: View, Object: Any): Boolean {
-        return view==Object
+class StatisticsSimpleAdapter(val datas:QuestionModel,val context: Context):RecyclerView.Adapter<StatisticsSimpleViewHolder>(){
+    override fun onCreateViewHolder(parent: ViewGroup, p1: Int): StatisticsSimpleViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
+        val view = inflater.inflate(R.layout.statistics_view_layout,parent,false)
+        val cell = StatisticsSimpleViewHolder(view)
+
+        return cell
     }
 
-    override fun getCount(): Int {
+    override fun getItemCount(): Int {
         return datas.id!!.size
     }
 
-    override fun instantiateItem(container: ViewGroup, position: Int): Any {
-        val inflater = LayoutInflater.from(context)
-        val view = inflater.inflate(R.layout.statistics_view_layout,container,false)
-        val num = list.addOnPageChangeListener(object:ViewPager.OnPageChangeListener{
-            override fun onPageScrollStateChanged(p0: Int) {
-
-            }
-
-            override fun onPageScrolled(p0: Int, p1: Float, p2: Int) {
-
-            }
-
-            override fun onPageSelected(position: Int) {
-                val header = "Question ${position+1}"
-                examHeader.text = header
-            }
-        })
-
-
-
+    override fun onBindViewHolder(holder: StatisticsSimpleViewHolder, position: Int) {
         val id = datas.id!![position]
-        val text = datas.text!![position]
         val image = datas.image_url!![position]
-        val audio = datas.audio_url!![position]
-        val questions: ArrayList<HashMap<String, String?>> = ArrayList()
-        for(sub in datas.sub_id[id]!!.iterator()){
-            val index = datas.sub_id[id]!!.indexOf(sub)
-            val sub_id = datas.sub_id[id]!![index]
-            val sub_text = datas.sub_text[id]!![index]
-            val sub_audio_url = datas.sub_audio_url[id]!![index]
-            val answer = datas.answer[id]!![index]
-            Log.d("-----answers",datas.user_answer.toString())
-            val user_answer = datas.user_answer[id]!![index]
-            val question = hashMapOf("id" to sub_id,"text" to sub_text,"audio" to sub_audio_url,"answer" to answer,"user_answer" to user_answer)
-            questions.add(question)
-        }
-        val Question1 = questions[0]
-        val Question2 = questions[1]
-        val Question3 = questions[2]
-        val examHolder = view
+        val imageHolder = holder.itemView.questionImage
+        val isCorrect = checkAnswer(datas.correct_answer[id]!!)
+        imageHolder.setBackgroundColor(when(isCorrect){
+            null->context.resources.getColor(R.color.colorNull)
+            true->context.resources.getColor(R.color.green)
+            false->context.resources.getColor(R.color.red)
+        })
 
         Glide.with(context)
                 .load(image)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .thumbnail(Glide.with(context).load(R.mipmap.loader))
-                .fitCenter()
+                .centerCrop()
                 .crossFade()
-                .into(examHolder.image)
-        examHolder.questionText.text = text
+                .into(imageHolder)
 
 
-        examHolder.question1.text = Question1["text"]
-        examHolder.question2.text = Question2["text"]
-        examHolder.question3.text = Question3["text"]
-
-        val user_answer1 = if(Question1["user_answer"]!=null) Question1["user_answer"] else Question1["answer"]
-        val user_answer2 = if(Question2["user_answer"]!=null) Question2["user_answer"] else Question2["answer"]
-        val user_answer3 = if(Question3["user_answer"]!=null) Question3["user_answer"] else Question3["answer"]
-
-        examHolder.switch1.state = getState(user_answer1)
-        examHolder.switch2.state = getState(user_answer2)
-        examHolder.switch3.state = getState(user_answer3)
-
-        examHolder.question1area.setBackgroundColor(getBackground(Question1["answer"],Question1["user_answer"]))
-        examHolder.question2area.setBackgroundColor(getBackground(Question2["answer"],Question2["user_answer"]))
-        examHolder.question3area.setBackgroundColor(getBackground(Question3["answer"],Question3["user_answer"]))
-
-
-        container.addView(view)
-        return view
     }
 
-    fun getState(state:String?):Int{
-        val state = state!!.toDouble().toInt()
-        return when(state){
-            0->RMTristateSwitch.STATE_LEFT
-            1->RMTristateSwitch.STATE_RIGHT
-            else -> RMTristateSwitch.STATE_MIDDLE
-        }
+    val Int.dp: Int get() = (this * context.resources.displayMetrics.density).toInt()
+
+    fun checkAnswer(answers:ArrayList<Boolean?>):Boolean?{
+        val answer1 = if(answers[0]!=null) answers[0] else null
+        val answer2 = if(answers[1]!=null) answers[1] else null
+        val answer3 = if(answers[2]!=null) answers[2] else null
+        val returns:Boolean?
+        if(answer1==null || answer2==null || answer3==null)
+            returns = null
+        else if(answer1 && answer2 && answer3)
+            returns = true
+        else
+            return false
+        return returns
     }
-
-    fun getBackground(answer:String?,user_answer:String?):Int{
-        return if(user_answer==null)
-            context.resources.getColor(R.color.nullBackground)
-        else if(answer==user_answer)
-            context.resources.getColor(R.color.trueBackground)
-        else context.resources.getColor(R.color.falseBackground)
-    }
-
-    override fun destroyItem(container: ViewGroup, position: Int, view: Any) {
-        container.removeView(view as View)
-    }
-
-
 
 }
+
+class StatisticsSimpleViewHolder(v:View):RecyclerView.ViewHolder(v)
+
 
 
 

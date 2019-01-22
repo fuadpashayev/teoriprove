@@ -49,14 +49,10 @@ class ExamFragment : Fragment() {
         realActivity = (activity as HomeActivity)
         phoneManager = context!!.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
         DEVICE_ID = phoneManager.deviceId
-        phoneManager.listen(object:PhoneStateListener(){
-
-        },PhoneStateListener.LISTEN_CALL_STATE)
-        object:PhoneStateListener(){
-
-        }
         val data = this.arguments!!.getString("data")
         val isFromCategory = this.arguments!!.getBoolean("fromCategory")
+        if(isFromCategory)
+            realActivity.isFromCategory = true
         val question = QuestionModel(data)
         val list = view.questionList
         val layoutManager = listLayoutManager(context!!)
@@ -66,7 +62,9 @@ class ExamFragment : Fragment() {
         list.layoutManager = layoutManager
         list.adapter = QuestionAdapter(question,context!!,object:QuestionAdapter.DataLoadedListener{
             override fun onLoadFinished() {
-                loader.visibility = View.GONE
+                Handler().postDelayed({
+                    loader.visibility = View.GONE
+                },500)
             }
 
         },list,view.examHeader,realActivity,activity!!,view.finishExamSession,manager!!,isFromCategory)
@@ -75,20 +73,7 @@ class ExamFragment : Fragment() {
 
 
         view.backButton.setOnClickListener {
-            val dialog = AlertDialog.Builder(activity)
-            dialog.setTitle("Exit from exam")
-            dialog.setMessage("Are you sure to exit from exam?")
-            dialog.setNegativeButton(Html.fromHtml("<font color=\"#3F51B5\">Cancel</font>")) { _, _ ->  }
-            dialog.setPositiveButton(Html.fromHtml("<font color=\"#3F51B5\">Exit</font>")) { _, _ ->
-                if(isFromCategory) {
-                    realActivity.openedFragment = "CategoryExaming"
-                    activity!!.onBackPressed()
-                }
-                else
-                    realActivity.openedFragment = "Examing"
-                activity!!.onBackPressed()
-            }
-            dialog.create().show()
+            activity!!.onBackPressed()
         }
 
 
@@ -171,6 +156,7 @@ class ExamFragment : Fragment() {
                 transaction.addToBackStack(null)
                 transaction.commit()
                 realActivity.openedFragment = newTag
+                realActivity.actionBar.visibility = View.GONE
 
             }
 
@@ -204,15 +190,13 @@ class ExamFragment : Fragment() {
             val examHolder = holder.itemView
             val listened = arrayListOf<String>()
 
-            Glide.with(context)
-                    .load(image)
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .thumbnail(Glide.with(context).load(R.mipmap.loader))
-                    .fitCenter()
-                    .crossFade()
-                    .into(examHolder.image)
+
             examHolder.questionText.text = text
             Handler().postDelayed({
+                Glide.with(context)
+                        .load(image)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .into(examHolder.image)
                 examHolder.image.scaleType = ImageView.ScaleType.CENTER_CROP
                 playAudio(audio,object:AudioListener{
                     override fun onCompleted() {
@@ -284,7 +268,10 @@ class ExamFragment : Fragment() {
                         }
                     }
                 })
-            },300)
+
+                listener.onLoadFinished()
+
+            },500)
 
 
             examHolder.finishExam.setOnClickListener{
@@ -295,8 +282,6 @@ class ExamFragment : Fragment() {
                 list.scrollToPosition(position+1)
             }
 
-
-            listener.onLoadFinished()
         }
 
         fun checkState(state:Int):Boolean{
@@ -317,19 +302,20 @@ class ExamFragment : Fragment() {
             dialog.setMessage("Are you sure to end exam session?")
             dialog.setNegativeButton(Html.fromHtml("<font color=\"#3F51B5\">Cancel</font>")) { _, _ ->  }
             dialog.setPositiveButton(Html.fromHtml("<font color=\"#3F51B5\">Finish</font>")) { _, _ ->
-                val data = HashMap<String,String>()
+                val data = HashMap<String,String?>()
                 data["session_id"] = session_id
-                data["user_id"] = user!!.id!!
+                data["user_id"] = user?.id
+                data["device_id"] = DEVICE_ID
                 data["answers"] = JSONObject(session).toString()
                 data["question_list"] = JSONArray(question_list).toString()
                 Answer(context).sendAnswer(data,object:ServerCallback{
                     override fun onSuccess(result: JSONObject?) {
                         val args = Bundle()
                         args.putString("session_id",session_id)
-                        args.putString("user_id",user!!.id!!)
+                        args.putString("user_id",user!!.id)
                         args.putBoolean("isFromExam",true)
                         args.putBoolean("isFromCategory",isFromCategory)
-                        StatisticsViewFragment().start(args)
+                        StatisticsViewDetailedFragment().start(args)
                     }
                     override fun onError(error: VolleyError) {
                         Log.d("----error",error.networkResponse.statusCode.toString()+" - ")
@@ -337,19 +323,6 @@ class ExamFragment : Fragment() {
                 })
             }
             dialog.create().show()
-        }
-
-        fun RMTristateSwitch.toggleState(toggleListener: ToggleListener){
-            val state = this.state
-            when(state){
-                RMTristateSwitch.STATE_MIDDLE->{
-                    this.state=RMTristateSwitch.STATE_RIGHT
-                    toggleListener.onToggled(true)
-                }
-                RMTristateSwitch.STATE_LEFT->toggleListener.onToggled(false)
-                RMTristateSwitch.STATE_RIGHT->toggleListener.onToggled(true)
-
-            }
         }
 
 
@@ -375,9 +348,6 @@ class ExamFragment : Fragment() {
         }
         interface DataLoadedListener{
             fun onLoadFinished()
-        }
-        interface ToggleListener{
-            fun onToggled(state:Boolean)
         }
 
         val Int.dp: Int get() = (this * context.resources.displayMetrics.density).toInt()
@@ -412,7 +382,7 @@ class ExamFragment : Fragment() {
     class QuestionViewHolder(v:View):RecyclerView.ViewHolder(v)
 
     class Answer(val context:Context){
-        fun sendAnswer(data:HashMap<String,String>?,serverCallback: ServerCallback){
+        fun sendAnswer(data:HashMap<String,String?>?,serverCallback: ServerCallback){
             val queue = Volley.newRequestQueue(context)
             val url = "http://test.azweb.dk/api/answer"
             var message: JSONObject?
@@ -431,7 +401,7 @@ class ExamFragment : Fragment() {
                     return headers
                 }
 
-                override fun getParams(): HashMap<String, String> {
+                override fun getParams(): HashMap<String, String?> {
                     return data!!
                 }
 
