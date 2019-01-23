@@ -35,37 +35,23 @@ class LoginFragment : Fragment() {
                 Toast.makeText(context, "You must fill all the fields", Toast.LENGTH_SHORT).show()
             }else{
                 loader.show()
-                val queue = Volley.newRequestQueue(context)
                 val url = "http://test.azweb.dk/api/auth/login"
-                val postRequest = object : StringRequest(Request.Method.POST, url,
-                        Response.Listener { response ->
-                            val res = JSONObject(response)
-                            val token = res.getString("access_token")
-                            val editor = sharedpreferences.edit()
-                            editor.putString("token", token)
-                            editor.apply()
-                            Home()
-                            loader.hide()
-
-
-                        },
-                        Response.ErrorListener {
-                            loader.hide()
-                            if(it.message==null)
-                                Toast.makeText(context, "Email or password is incorrect", Toast.LENGTH_SHORT).show()
-                            else
-                                Toast.makeText(context, "No Internet Connection", Toast.LENGTH_SHORT).show()
-                        }
-                ) {
-                    override fun getParams(): Map<String, String> {
-                        val params = HashMap<String, String>()
-                        params["email"] = email
-                        params["password"] = password
-
-                        return params
+                val params:MutableMap<String,String?> = HashMap()
+                params["email"] = email
+                params["password"] = password
+                Query(activity!!).post(url,params,responseCallBack = object:ResponseCallBack{
+                    override fun onSuccess(response: String?) {
+                        val res = JSONObject(response)
+                        val token = res.getString("access_token")
+                        val editor = sharedpreferences.edit()
+                        editor.putString("token", token)
+                        editor.apply()
+                        Home()
+                        loader.hide()
                     }
-                }
-                queue.add(postRequest)
+
+                })
+
             }
 
         }

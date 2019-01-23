@@ -38,47 +38,32 @@ class StatisticsViewDetailedFragment : Fragment() {
     lateinit var DEVICE_ID: String
     lateinit var phoneManager: TelephonyManager
     lateinit var realActivity: HomeActivity
-    lateinit var user_id:String
+    var user_id:String? = null
     @SuppressLint("MissingPermission")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         realActivity = (activity as HomeActivity)
         val view = inflater.inflate(R.layout.fragment_statistics_view_detailed, container, false)
         phoneManager = context!!.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
         DEVICE_ID = phoneManager.deviceId
-        user_id = this.arguments!!.getString("user_id")!!
+        user_id = this.arguments!!.getString("user_id")
         val isFromExam = this.arguments!!.getBoolean("isFromExam")
         val isFromCategory = this.arguments!!.getBoolean("isFromCategory")
         if(isFromExam)
             realActivity.openedFragment = "StatisticsFromExam"
         val session_id = this.arguments!!.getString("session_id")!!
-        val queue = Volley.newRequestQueue(context)
         val url = "http://test.azweb.dk/api/answer/statistics/session"
-        val postRequest = object : StringRequest(Request.Method.POST, url,
-                Response.Listener { response ->
-                    Log.d("------response",response.toString())
-                    val data = QuestionModel(response)
-                    view.pager.adapter = StatisticsPagerAdapter(data,examHeader,context!!,view.pager)
-                    view.loader.visibility = View.GONE
-                },
-                Response.ErrorListener {
-                    Log.d("-------Error", "error")
-                }
-        ) {
-            override fun getHeaders(): MutableMap<String, String> {
-                val headers = HashMap<String, String>()
-                headers["Accept"] = "application/json"
-                return headers
+        val params:MutableMap<String,String?>? = HashMap()
+        if(user_id!=null)
+            params!!["user_id"] = user_id
+        params!!["device_id"] = DEVICE_ID
+        params["session_id"] = session_id
+        Query(activity!!).post(url,params,responseCallBack = object : ResponseCallBack{
+            override fun onSuccess(response: String?) {
+                val data = QuestionModel(response)
+                view.pager.adapter = StatisticsPagerAdapter(data,examHeader,context!!,view.pager)
+                view.loader.visibility = View.GONE
             }
-
-            override fun getParams(): MutableMap<String, String> {
-                val params = HashMap<String,String>()
-                params["user_id"] = user_id
-                params["session_id"] = session_id
-                return params
-            }
-        }
-        queue.add(postRequest)
-
+        })
 
 
         view.backButton.setOnClickListener {
@@ -129,27 +114,33 @@ class StatisticsPagerAdapter(val datas:QuestionModel,val examHeader:TextView,val
         val text = datas.text!![position]
         val image = datas.image_url!![position]
         val audio = datas.audio_url!![position]
-        val questions: ArrayList<HashMap<String, String?>> = ArrayList()
+        val questions: ArrayList<HashMap<String,String?>?> = ArrayList()
+        var Question1:HashMap<String,String?>? = null
+        var Question2:HashMap<String,String?>? = null
+        var Question3:HashMap<String,String?>? = null
+        var Question4:HashMap<String,String?>? = null
         for(sub in datas.sub_id[id]!!.iterator()){
             val index = datas.sub_id[id]!!.indexOf(sub)
             val sub_id = datas.sub_id[id]!![index]
             val sub_text = datas.sub_text[id]!![index]
             val sub_audio_url = datas.sub_audio_url[id]!![index]
             val answer = datas.answer[id]!![index]
-            Log.d("-----answers",datas.user_answer.toString())
             val user_answer = datas.user_answer[id]!![index]
             val question = hashMapOf("id" to sub_id,"text" to sub_text,"audio" to sub_audio_url,"answer" to answer,"user_answer" to user_answer)
             questions.add(question)
         }
-        val Question1 = questions[0]
-        val Question2 = questions[1]
-        val Question3 = questions[2]
+        Question1 = questions[0]!!
+        Question2 = questions[1]!!
+        if(questions.size>2)
+            Question3 = questions[2]!!
+        if(questions.size>3)
+            Question4 = questions[3]!!
         val examHolder = view
 
         Glide.with(context)
                 .load(image)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .thumbnail(Glide.with(context).load(R.mipmap.loader))
+                .thumbnail(Glide.with(context).load(R.mipmap.loader1))
                 .fitCenter()
                 .crossFade()
                 .into(examHolder.image)
@@ -157,20 +148,35 @@ class StatisticsPagerAdapter(val datas:QuestionModel,val examHeader:TextView,val
 
 
         examHolder.question1.text = Question1["text"]
-        examHolder.question2.text = Question2["text"]
-        examHolder.question3.text = Question3["text"]
-
         val user_answer1 = if(Question1["user_answer"]!=null) Question1["user_answer"] else Question1["answer"]
-        val user_answer2 = if(Question2["user_answer"]!=null) Question2["user_answer"] else Question2["answer"]
-        val user_answer3 = if(Question3["user_answer"]!=null) Question3["user_answer"] else Question3["answer"]
-
         getState(user_answer1,1,examHolder)
-        getState(user_answer2,2,examHolder)
-        getState(user_answer3,3,examHolder)
-
         examHolder.question1area.setBackgroundColor(getBackground(Question1["answer"],Question1["user_answer"]))
+
+
+
+        examHolder.question2.text = Question2["text"]
+        val user_answer2 = if(Question2["user_answer"]!=null) Question2["user_answer"] else Question2["answer"]
+        getState(user_answer2,2,examHolder)
         examHolder.question2area.setBackgroundColor(getBackground(Question2["answer"],Question2["user_answer"]))
-        examHolder.question3area.setBackgroundColor(getBackground(Question3["answer"],Question3["user_answer"]))
+
+
+        if(Question3!=null) {
+            examHolder.question3area.visibility = View.VISIBLE
+            examHolder.question3.text = Question3["text"]
+            val user_answer3 = if (Question3["user_answer"] != null) Question3["user_answer"] else Question3["answer"]
+            getState(user_answer3, 3, examHolder)
+            examHolder.question3area.setBackgroundColor(getBackground(Question3["answer"], Question3["user_answer"]))
+        }
+
+
+        if(Question4!=null) {
+            examHolder.question4area.visibility = View.VISIBLE
+            examHolder.question4.text = Question4["text"]
+            val user_answer4 = if (Question4["user_answer"] != null) Question4["user_answer"] else Question4["answer"]
+            getState(user_answer4, 4, examHolder)
+            examHolder.question4area.setBackgroundColor(getBackground(Question4["answer"], Question4["user_answer"]))
+        }
+
 
 
         container.addView(view)
@@ -185,6 +191,7 @@ class StatisticsPagerAdapter(val datas:QuestionModel,val examHeader:TextView,val
                     1->holder.radioButton11.isChecked = true
                     2->holder.radioButton21.isChecked = true
                     3->holder.radioButton31.isChecked = true
+                    4->holder.radioButton41.isChecked = true
                 }
             }
             0->{
@@ -192,6 +199,7 @@ class StatisticsPagerAdapter(val datas:QuestionModel,val examHeader:TextView,val
                     1->holder.radioButton12.isChecked = true
                     2->holder.radioButton22.isChecked = true
                     3->holder.radioButton32.isChecked = true
+                    4->holder.radioButton42.isChecked = true
                 }
             }
         }

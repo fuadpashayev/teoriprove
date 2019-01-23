@@ -94,28 +94,15 @@ class HomeActivity : AppCompatActivity() {
             dialog.create().show()
         }
 
-        val queue = Volley.newRequestQueue(this)
         val url = "http://test.azweb.dk/api/category"
-        val postRequest = object : StringRequest(Request.Method.POST, url,
-                Response.Listener { response ->
-                    val data = CategoryModel(response)
-                    val adapter = TestAdapter(data,this,manager,this)
-                    testList.adapter = adapter
-
-                },
-                Response.ErrorListener {
-                    Log.d("-------Error", "error")
-                }
-        ) {
-            override fun getHeaders(): MutableMap<String, String> {
-                val headers = HashMap<String, String>()
-                headers["Accept"] = "application/json"
-                return headers
+        Query(this).get(url,responseCallBack = object:ResponseCallBack{
+            override fun onSuccess(response: String?) {
+                val data = CategoryModel(response)
+                val adapter = TestAdapter(data,this@HomeActivity,manager,this@HomeActivity)
+                testList.adapter = adapter
             }
-        }
-        queue.add(postRequest)
 
-
+        })
 
     }
 
@@ -277,9 +264,10 @@ class TestAdapter(val data:CategoryModel,val context:Context,val manager:Fragmen
     override fun onBindViewHolder(holder: TestViewHolder, position: Int) {
         val id = data.id!![position].toDouble().toInt()
         val image = data.image_url!![position]
+        val name = data.name!![position]
         val testHolder = holder.itemView.openTest
         val imageHolder = holder.itemView.backgroundImage
-        testHolder.testName.text = "Test $id"
+        testHolder.testName.text = name
 
         Glide.with(context)
                 .load(image)
@@ -291,31 +279,52 @@ class TestAdapter(val data:CategoryModel,val context:Context,val manager:Fragmen
             testHolder.freeText.visibility = View.GONE
         testHolder.openTest.setOnClickListener {
             if(id==1) {
-                val queue = Volley.newRequestQueue(context)
-                val url = "http://test.azweb.dk/api/question/random/with_sub_questions"
-                val postRequest = object : StringRequest(Request.Method.POST, url,
-                        Response.Listener { response ->
-                            val args = Bundle()
-                            args.putString("data", response)
-                            ExamFragment().start(args)
-                            realActivity.ActionBar.visibility = View.GONE
-                        },
-                        Response.ErrorListener {
-                            Log.d("-------Error", "error")
+                val url = "http://test.azweb.dk/api/category/1"
+                Query(context).get(url,responseCallBack = object:ResponseCallBack{
+                    override fun onSuccess(response: String?) {
+                        val args = Bundle()
+                        args.putString("data", response)
+                        ExamFragment().start(args)
+                        realActivity.ActionBar.visibility = View.GONE
+                    }
+                })
+            }else{
+//                val intent = Intent(context,MainActivity::class.java)
+//                intent.putExtra("loggedIn",false)
+//                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+//                context.applicationContext.startActivity(intent)
+                val itemNames = arrayListOf<Any>("Sign Up","Payment Plan","Continue with Free")
+                val items = itemNames.toArray(arrayOfNulls<String>(itemNames.size))
+                val dialog = AlertDialog.Builder(context)
+                dialog.setTitle("Select to continue")
+                dialog.setCancelable(true)
+                dialog.setNegativeButton(Html.fromHtml("<font color=\"red\">Cancel</font>")){_,_->}
+                dialog.setItems(items){_,item->
+                    when(item){
+                        0->{
+                            RegisterFragment().start()
                         }
-                ) {
-                    override fun getHeaders(): MutableMap<String, String> {
-                        val headers = HashMap<String, String>()
-                        headers["Accept"] = "application/json"
-                        return headers
+                        1->{
+
+                        }
+                        2->{
+                            val url = "http://test.azweb.dk/api/category/1"
+                            Query(context).get(url,responseCallBack = object:ResponseCallBack{
+                                override fun onSuccess(response: String?) {
+                                    val args = Bundle()
+                                    args.putString("data", response)
+                                    ExamFragment().start(args)
+                                    realActivity.ActionBar.visibility = View.GONE
+                                }
+                            })
+                        }
+                        3->{
+
+                        }
                     }
                 }
-                queue.add(postRequest)
-            }else{
-                val intent = Intent(context,MainActivity::class.java)
-                intent.putExtra("loggedIn",false)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                context.applicationContext.startActivity(intent)
+                dialog.create().show()
+
             }
         }
 

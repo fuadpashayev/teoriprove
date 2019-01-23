@@ -49,35 +49,18 @@ class StatisticsViewFragment : Fragment() {
         DEVICE_ID = phoneManager.deviceId
         user_id = this.arguments!!.getString("user_id")!!
         val session_id = this.arguments!!.getString("session_id")!!
-        val queue = Volley.newRequestQueue(context)
         val url = "http://test.azweb.dk/api/answer/statistics/session"
-        val postRequest = object : StringRequest(Request.Method.POST, url,
-                Response.Listener { response ->
-                    Log.d("------response",response.toString())
-                    val data = QuestionModel(response)
-                    view.simpleList.adapter = StatisticsSimpleAdapter(data,context!!)
-                    view.loader.visibility = View.GONE
-                },
-                Response.ErrorListener {
-                    Log.d("-------Error", "error")
-                }
-        ) {
-            override fun getHeaders(): MutableMap<String, String> {
-                val headers = HashMap<String, String>()
-                headers["Accept"] = "application/json"
-                return headers
+        val params:MutableMap<String,String?> = HashMap()
+        params["user_id"] = user_id
+        params["session_id"] = session_id
+
+        Query(activity!!).post(url,params,responseCallBack = object:ResponseCallBack{
+            override fun onSuccess(response: String?) {
+                val data = QuestionModel(response)
+                view.simpleList.adapter = StatisticsSimpleAdapter(data,context!!)
+                view.loader.visibility = View.GONE
             }
-
-            override fun getParams(): MutableMap<String, String> {
-                val params = HashMap<String,String>()
-                params["user_id"] = user_id
-                params["session_id"] = session_id
-                return params
-            }
-        }
-        queue.add(postRequest)
-
-
+        })
 
         view.backButton.setOnClickListener {
             realActivity.openedFragment = "Statistics"

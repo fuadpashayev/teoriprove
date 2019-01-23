@@ -26,6 +26,8 @@ import android.graphics.drawable.ColorDrawable
 import android.support.v4.app.FragmentManager
 import android.text.Html
 import android.widget.ImageView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 
 
 class CategoryFragment : Fragment() {
@@ -34,47 +36,25 @@ class CategoryFragment : Fragment() {
         realActivity.actionBar.visibility = View.GONE
         val view =  inflater.inflate(R.layout.fragment_category, container, false)
         val manager = fragmentManager
-        val queue = Volley.newRequestQueue(context)
         val url = "http://test.azweb.dk/api/category"
-        val postRequest = object : StringRequest(Request.Method.POST, url,
-            Response.Listener { response ->
+        Query(activity!!).get(url,responseCallBack = object : ResponseCallBack{
+            override fun onSuccess(response: String?) {
                 val category = CategoryModel(response)
-
-                val layoutManager = GridLayoutManager(context,3)
+                val layoutManager = GridLayoutManager(context,2)
                 view.categoryList.layoutManager = layoutManager
                 view.categoryList.adapter = CategoryAdapter(category,view,realActivity,manager!!,context!!)
-
-            },
-            Response.ErrorListener {
-                Log.d("-------Error", "error")
             }
-        ) {
-            override fun getHeaders(): MutableMap<String, String> {
-                val headers = HashMap<String, String>()
-                headers["Accept"] = "application/json"
-                return headers
-            }
-        }
-        queue.add(postRequest)
 
-
-
+        })
 
         view.backButton.setOnClickListener {
             activity!!.onBackPressed()
         }
 
-
-
-
         return view
     }
 
-
-
-
 }
-
 
 class CategoryAdapter(val datas:CategoryModel,val realView:View,val realActivity: HomeActivity,val manager: FragmentManager,val context: Context):RecyclerView.Adapter<CategoryViewHolder>(){
 
@@ -93,58 +73,39 @@ class CategoryAdapter(val datas:CategoryModel,val realView:View,val realActivity
     override fun onBindViewHolder(holder: CategoryViewHolder, position: Int) {
         val id = datas.id!![position].toDouble().toInt()
         val name = datas.name!![position]
-
+        val image_url = datas.image_url!![position]
+        Glide.with(context)
+                .load(image_url)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .into(holder.itemView.backgroundImage)
         val view = holder.itemView
         val check = view.checkBox
-        val box = view.openCategory
+        val box = view.backgroundLayer
         view.categoryName.text = name
         view.selectBox.setOnClickListener {
             check.toggleCheck(id)
-            box.toggleBackground()
+            if(selected.contains(id))
+                box.setBackgroundColor(context.resources.getColor(R.color.selected))
+            else
+                box.setBackgroundColor(context.resources.getColor(R.color.not_selected))
         }
 
 
         realView.startArea.setOnClickListener {
-            val queue = Volley.newRequestQueue(context)
             val url = "http://test.azweb.dk/api/category/questions"
-            val postRequest = object : StringRequest(Request.Method.POST, url,
-                    Response.Listener { response ->
+            val params:MutableMap<String,String?>? = HashMap()
+            params!!["categories"] = selected.toString()
 
-                        ExamFragment().start(response)
-
-                    },
-                    Response.ErrorListener {
-                        Log.d("-------Error", "error")
-                    }
-            ) {
-                override fun getHeaders(): MutableMap<String, String> {
-                    val headers = HashMap<String, String>()
-                    headers["Accept"] = "application/json"
-                    return headers
+            Query(context).post(url,params,responseCallBack = object:ResponseCallBack{
+                override fun onSuccess(response: String?) {
+                    ExamFragment().start(response)
                 }
 
-                override fun getParams(): MutableMap<String, String> {
-                    val params = HashMap<String,String>()
-                    params["categories"] = selected.toString()
-                    return params
-                }
-            }
-            queue.add(postRequest)
-
-        }
-
-
-
-    }
-
-    fun ConstraintLayout.toggleBackground(){
-        val color = (this.background as ColorDrawable).color
-        when(color){
-            -1->this.setBackgroundColor(context.resources.getColor(R.color.selected))
-            else->this.setBackgroundColor(context.resources.getColor(R.color.white))
+            })
         }
 
     }
+
 
     fun ImageView.toggleCheck(id:Int){
         val state = this.visibility

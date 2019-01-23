@@ -82,7 +82,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="100dp"
                     android:layout_marginStart="25dp"
-                    android:layout_marginTop="40dp"
+                    android:layout_marginTop="60dp"
                     android:gravity="center_vertical"
                     android:text="TextView"
                     android:textColor="#333333"
@@ -99,7 +99,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="100dp"
                     android:layout_marginStart="25dp"
-                    android:layout_marginTop="40dp"
+                    android:layout_marginTop="60dp"
                     android:gravity="center_vertical"
                     android:text="TextView"
                     android:textColor="#333333"
@@ -108,6 +108,22 @@
                     app:layout_constraintHorizontal_bias="0.5"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/question2" />
+
+                <TextView
+                    android:id="@+id/question4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="100dp"
+                    android:layout_marginStart="25dp"
+                    android:layout_marginTop="60dp"
+                    android:gravity="center_vertical"
+                    android:text="TextView"
+                    android:textColor="#333333"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/question3" />
 
 
                 <Button
@@ -129,7 +145,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.5"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/question3"
+                    app:layout_constraintTop_toBottomOf="@+id/question4"
                     app:srcCompat="@drawable/ic_next" />
 
                 <Button
@@ -151,14 +167,14 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.5"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/question3"
+                    app:layout_constraintTop_toBottomOf="@+id/question4"
                     app:srcCompat="@drawable/ic_next" />
 
                 <RadioGroup
                     android:id="@+id/answer1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="25dp"
+                    android:layout_marginTop="10dp"
                     android:scaleX="0.9"
                     android:scaleY="0.9"
                     android:visibility="gone"
@@ -188,7 +204,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginTop="35dp"
+                    android:layout_marginTop="40dp"
                     android:scaleX="0.9"
                     android:scaleY="0.9"
                     android:visibility="gone"
@@ -219,7 +235,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginTop="35dp"
+                    android:layout_marginTop="40dp"
                     android:scaleX="0.9"
                     android:scaleY="0.9"
                     android:visibility="gone"
@@ -243,6 +259,37 @@
                         android:layout_weight="1"
                         android:text="Nej" />
                 </RadioGroup>
+
+                <RadioGroup
+                    android:id="@+id/answer4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginTop="40dp"
+                    android:scaleX="0.9"
+                    android:scaleY="0.9"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/question4"
+                    app:layout_constraintTop_toBottomOf="@+id/question3">
+
+                    <RadioButton
+                        android:id="@+id/radioButton41"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:buttonTint="@color/green"
+                        android:layout_weight="1"
+                        android:text="Ja" />
+
+                    <RadioButton
+                        android:id="@+id/radioButton42"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:buttonTint="@color/red"
+                        android:layout_weight="1"
+                        android:text="Nej" />
+                </RadioGroup>
+
 
 
             </android.support.constraint.ConstraintLayout>

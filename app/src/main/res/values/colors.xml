@@ -9,6 +9,6 @@
     <color name="red">#c1b43434</color>
     <color name="green">#c138ac36</color>
     <color name="colorNull">#6e6e6e</color>
-    <color name="white">#ffffff</color>
-    <color name="selected">#e7e7e7</color>
+    <color name="not_selected">#70000000</color>
+    <color name="selected">#c3000000</color>
 </resources>

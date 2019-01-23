@@ -36,10 +36,14 @@ class StatisticsFragment : Fragment() {
         DEVICE_ID = phoneManager.deviceId
         manager = fragmentManager!!
         user_id = this.arguments!!.getString("user_id")
-        val queue = Volley.newRequestQueue(context)
+
         val url = "http://test.azweb.dk/api/answer/statistics"
-        val postRequest = object : StringRequest(Request.Method.POST, url,
-            Response.Listener { response ->
+        val params = HashMap<String,String?>()
+        if(user_id!=null)
+            params["user_id"] = user_id
+        params["device_id"] = DEVICE_ID
+        Query(activity!!).post(url,params,responseCallBack = object : ResponseCallBack{
+            override fun onSuccess(response: String?) {
                 val statistics = StatisticsModel(response)
                 if(!statistics.error) {
                     view.statisticsList.adapter = StatisticsAdapter(statistics, realActivity, manager, user_id, context!!)
@@ -47,27 +51,9 @@ class StatisticsFragment : Fragment() {
                     view.emptyMessage.visibility = View.VISIBLE
                 }
                 view.loader.visibility = View.GONE
-            },
-            Response.ErrorListener {
-                Log.d("-------Error", "error")
-            }
-        ) {
-            override fun getHeaders(): MutableMap<String, String> {
-                val headers = HashMap<String, String>()
-                headers["Accept"] = "application/json"
-                return headers
             }
 
-            override fun getParams(): MutableMap<String, String?> {
-                val params = HashMap<String,String?>()
-                params["user_id"] = user_id
-                return params
-            }
-        }
-        queue.add(postRequest)
-
-
-
+        })
 
         view.backButton.setOnClickListener {
             activity!!.onBackPressed()

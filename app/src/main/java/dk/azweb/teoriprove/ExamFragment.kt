@@ -175,7 +175,11 @@ class ExamFragment : Fragment() {
             val text = datas.text!![position]
             val image = datas.image_url!![position]
             val audio = datas.audio_url!![position]
-            val questions:ArrayList<HashMap<String,String>> = ArrayList()
+            val questions:ArrayList<HashMap<String,String>?> = ArrayList()
+            var Question1:HashMap<String,String>? = null
+            var Question2:HashMap<String,String>? = null
+            var Question3:HashMap<String,String>? = null
+            var Question4:HashMap<String,String>? = null
             for(sub in datas.sub_id[id]!!.iterator()){
                 val index = datas.sub_id[id]!!.indexOf(sub)
                 val sub_id = datas.sub_id[id]!![index]
@@ -184,9 +188,13 @@ class ExamFragment : Fragment() {
                 val question = hashMapOf("id" to sub_id,"text" to sub_text,"audio" to sub_audio_url)
                 questions.add(question)
             }
-            val Question1 = questions[0]
-            val Question2 = questions[1]
-            val Question3 = questions[2]
+            Question1 = questions[0]!!
+            Question2 = questions[1]!!
+            if(questions.size>2)
+                Question3 = questions[2]!!
+            if(questions.size>3)
+                Question4 = questions[3]!!
+
             val examHolder = holder.itemView
             val listened = arrayListOf<String>()
 
@@ -213,7 +221,6 @@ class ExamFragment : Fragment() {
                         examHolder.answer1.setOnCheckedChangeListener { _, answer1id ->
                             val id = Question1["id"]!!
                             session[id] = checkState(answer1id)
-                            Log.d("------session",session.toString())
                             Handler().postDelayed({
                                 examHolder.question2.text = Question2["text"]
                                 examHolder.question2.show()
@@ -232,38 +239,55 @@ class ExamFragment : Fragment() {
                             examHolder.answer2.setOnCheckedChangeListener{_,answer2id->
                                 val id = Question2["id"]!!
                                 session[id] = checkState(answer2id)
-                                Log.d("------session",session.toString())
                                 Handler().postDelayed({
-                                    examHolder.question3.text = Question3["text"]
-                                    examHolder.question3.show()
-                                    Handler().postDelayed({
-                                        examHolder.questionScroll.fullScroll(View.FOCUS_DOWN)
-                                    },100)
-                                    if(!listened.contains("audio3")) {
-                                        listened.add("audio3")
-                                        playAudio(Question3["audio"]!!,object:AudioListener{
-                                            override fun onCompleted() {
-                                                examHolder.answer3.show()
-                                            }
-                                        })
-                                    }
+                                    if(Question3!=null) {
+                                        examHolder.question3.text = Question3["text"]
+                                        examHolder.question3.show()
+                                        Handler().postDelayed({
+                                            examHolder.questionScroll.fullScroll(View.FOCUS_DOWN)
+                                        }, 100)
+                                        if (!listened.contains("audio3")) {
+                                            listened.add("audio3")
+                                            playAudio(Question3["audio"]!!, object : AudioListener {
+                                                override fun onCompleted() {
+                                                    examHolder.answer3.show()
+                                                }
+                                            })
+                                        }
+                                    }else checkOrFinishExam(position,examHolder)
+
                                 },300)
-                                examHolder.answer3.setOnCheckedChangeListener{_,answer3id->
-                                    val id = Question3["id"]!!
-                                    session[id] = checkState(answer3id)
-                                    Log.d("------session",session.toString())
-                                    Handler().postDelayed({
-                                        examHolder.questionScroll.fullScroll(View.FOCUS_DOWN)
-                                    },100)
 
-                                    if(position==24)
-                                        examHolder.finishExam.show()
-                                    else
-                                        examHolder.nextPage.show()
+                                    examHolder.answer3.setOnCheckedChangeListener { _, answer3id ->
+                                        val id = Question3!!["id"]!!
+                                        session[id] = checkState(answer3id)
+                                        Handler().postDelayed({
+                                            if(Question4!=null) {
+                                                examHolder.question4.text = Question4["text"]
+                                                examHolder.question4.show()
+                                                Handler().postDelayed({
+                                                    examHolder.questionScroll.fullScroll(View.FOCUS_DOWN)
+                                                }, 100)
+                                                if (!listened.contains("audio4")) {
+                                                    listened.add("audio4")
+                                                    playAudio(Question4["audio"]!!, object : AudioListener {
+                                                        override fun onCompleted() {
+                                                            examHolder.answer4.show()
+                                                        }
+                                                    })
+                                                }
+                                            }else checkOrFinishExam(position,examHolder)
 
-                                    if(position==0)
-                                        finishExamSession.show()
-                                }
+                                        },300)
+                                        examHolder.answer4.setOnCheckedChangeListener { _, answer4id ->
+                                            val id = Question4!!["id"]!!
+                                            session[id] = checkState(answer4id)
+                                            checkOrFinishExam(position,examHolder)
+                                        }
+                                    }
+
+
+
                             }
                         }
                     }
@@ -282,6 +306,18 @@ class ExamFragment : Fragment() {
                 list.scrollToPosition(position+1)
             }
 
+        }
+
+        fun checkOrFinishExam(position: Int,examHolder:View){
+            if(position==24)
+                examHolder.finishExam.show()
+            else {
+                finishExamSession.show()
+                examHolder.nextPage.show()
+            }
+            Handler().postDelayed({
+                examHolder.questionScroll.fullScroll(View.FOCUS_DOWN)
+            }, 100)
         }
 
         fun checkState(state:Int):Boolean{
@@ -304,7 +340,8 @@ class ExamFragment : Fragment() {
             dialog.setPositiveButton(Html.fromHtml("<font color=\"#3F51B5\">Finish</font>")) { _, _ ->
                 val data = HashMap<String,String?>()
                 data["session_id"] = session_id
-                data["user_id"] = user?.id
+                if(user?.id!=null)
+                    data["user_id"] = user?.id
                 data["device_id"] = DEVICE_ID
                 data["answers"] = JSONObject(session).toString()
                 data["question_list"] = JSONArray(question_list).toString()
@@ -312,13 +349,14 @@ class ExamFragment : Fragment() {
                     override fun onSuccess(result: JSONObject?) {
                         val args = Bundle()
                         args.putString("session_id",session_id)
-                        args.putString("user_id",user!!.id)
+                        args.putString("user_id",user?.id)
+                        args.putString("device_id",DEVICE_ID)
                         args.putBoolean("isFromExam",true)
                         args.putBoolean("isFromCategory",isFromCategory)
                         StatisticsViewDetailedFragment().start(args)
                     }
                     override fun onError(error: VolleyError) {
-                        Log.d("----error",error.networkResponse.statusCode.toString()+" - ")
+                        Log.d("----error",error.toString()+" - ")
                     }
                 })
             }
