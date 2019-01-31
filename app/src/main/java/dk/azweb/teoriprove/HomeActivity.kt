@@ -289,20 +289,19 @@ class TestAdapter(val data:CategoryModel,val context:Context,val manager:Fragmen
                     }
                 })
             }else{
-//                val intent = Intent(context,MainActivity::class.java)
-//                intent.putExtra("loggedIn",false)
-//                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-//                context.applicationContext.startActivity(intent)
-                val itemNames = arrayListOf<Any>("Sign Up","Payment Plan","Continue with Free")
+                val itemNames = arrayListOf<Any>("Sign In","Payment Plan","Continue with Free")
                 val items = itemNames.toArray(arrayOfNulls<String>(itemNames.size))
                 val dialog = AlertDialog.Builder(context)
                 dialog.setTitle("Select to continue")
                 dialog.setCancelable(true)
-                dialog.setNegativeButton(Html.fromHtml("<font color=\"red\">Cancel</font>")){_,_->}
+                dialog.setNegativeButton(Html.fromHtml("<font color=\"#CE2828\">Cancel</font>")){_,_->}
                 dialog.setItems(items){_,item->
                     when(item){
                         0->{
-                            RegisterFragment().start()
+                            val intent = Intent(context,MainActivity::class.java)
+                            intent.putExtra("loggedIn",false)
+                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                            context.applicationContext.startActivity(intent)
                         }
                         1->{
 

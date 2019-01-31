@@ -60,6 +60,7 @@ class StatisticsViewDetailedFragment : Fragment() {
         Query(activity!!).post(url,params,responseCallBack = object : ResponseCallBack{
             override fun onSuccess(response: String?) {
                 val data = QuestionModel(response)
+                view.pager.offscreenPageLimit = 3
                 view.pager.adapter = StatisticsPagerAdapter(data,examHeader,context!!,view.pager)
                 view.loader.visibility = View.GONE
             }
@@ -94,14 +95,8 @@ class StatisticsPagerAdapter(val datas:QuestionModel,val examHeader:TextView,val
         val inflater = LayoutInflater.from(context)
         val view = inflater.inflate(R.layout.statistics_view_detailed_layout,container,false)
         list.addOnPageChangeListener(object:ViewPager.OnPageChangeListener{
-            override fun onPageScrollStateChanged(p0: Int) {
-
-            }
-
-            override fun onPageScrolled(p0: Int, p1: Float, p2: Int) {
-
-            }
-
+            override fun onPageScrollStateChanged(p0: Int) {}
+            override fun onPageScrolled(p0: Int, p1: Float, p2: Int) {}
             override fun onPageSelected(position: Int) {
                 val header = "Question ${position+1}"
                 examHeader.text = header
@@ -176,7 +171,6 @@ class StatisticsPagerAdapter(val datas:QuestionModel,val examHeader:TextView,val
             getState(user_answer4, 4, examHolder)
             examHolder.question4area.setBackgroundColor(getBackground(Question4["answer"], Question4["user_answer"]))
         }
-
 
 
         container.addView(view)

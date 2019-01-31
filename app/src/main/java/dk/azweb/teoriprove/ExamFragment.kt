@@ -166,6 +166,9 @@ class ExamFragment : Fragment() {
             return datas.id!!.size
         }
 
+        override fun getItemViewType(position: Int): Int {
+            return position
+        }
 
 
         override fun onBindViewHolder(holder: QuestionViewHolder, position: Int) {
@@ -206,13 +209,13 @@ class ExamFragment : Fragment() {
                         .diskCacheStrategy(DiskCacheStrategy.ALL)
                         .into(examHolder.image)
                 examHolder.image.scaleType = ImageView.ScaleType.CENTER_CROP
-                playAudio(audio,object:AudioListener{
+                playAudio(audio, object : AudioListener {
                     override fun onCompleted() {
                         examHolder.question1.text = Question1["text"]
                         examHolder.question1.show()
-                        if(!listened.contains("audio1")) {
+                        if (!listened.contains("audio1")) {
                             listened.add("audio1")
-                            playAudio(Question1["audio"]!!,object:AudioListener{
+                            playAudio(Question1["audio"]!!, object : AudioListener {
                                 override fun onCompleted() {
                                     examHolder.answer1.show()
                                 }
@@ -226,21 +229,21 @@ class ExamFragment : Fragment() {
                                 examHolder.question2.show()
                                 Handler().postDelayed({
                                     examHolder.questionScroll.fullScroll(View.FOCUS_DOWN)
-                                },100)
-                                if(!listened.contains("audio2")) {
+                                }, 100)
+                                if (!listened.contains("audio2")) {
                                     listened.add("audio2")
-                                    playAudio(Question2["audio"]!!,object:AudioListener{
+                                    playAudio(Question2["audio"]!!, object : AudioListener {
                                         override fun onCompleted() {
                                             examHolder.answer2.show()
                                         }
                                     })
                                 }
-                            },300)
-                            examHolder.answer2.setOnCheckedChangeListener{_,answer2id->
+                            }, 300)
+                            examHolder.answer2.setOnCheckedChangeListener { _, answer2id ->
                                 val id = Question2["id"]!!
                                 session[id] = checkState(answer2id)
                                 Handler().postDelayed({
-                                    if(Question3!=null) {
+                                    if (Question3 != null) {
                                         examHolder.question3.text = Question3["text"]
                                         examHolder.question3.show()
                                         Handler().postDelayed({
@@ -254,38 +257,37 @@ class ExamFragment : Fragment() {
                                                 }
                                             })
                                         }
-                                    }else checkOrFinishExam(position,examHolder)
+                                    } else checkOrFinishExam(position, examHolder)
 
-                                },300)
+                                }, 300)
 
-                                    examHolder.answer3.setOnCheckedChangeListener { _, answer3id ->
-                                        val id = Question3!!["id"]!!
-                                        session[id] = checkState(answer3id)
-                                        Handler().postDelayed({
-                                            if(Question4!=null) {
-                                                examHolder.question4.text = Question4["text"]
-                                                examHolder.question4.show()
-                                                Handler().postDelayed({
-                                                    examHolder.questionScroll.fullScroll(View.FOCUS_DOWN)
-                                                }, 100)
-                                                if (!listened.contains("audio4")) {
-                                                    listened.add("audio4")
-                                                    playAudio(Question4["audio"]!!, object : AudioListener {
-                                                        override fun onCompleted() {
-                                                            examHolder.answer4.show()
-                                                        }
-                                                    })
-                                                }
-                                            }else checkOrFinishExam(position,examHolder)
+                                examHolder.answer3.setOnCheckedChangeListener { _, answer3id ->
+                                    val id = Question3!!["id"]!!
+                                    session[id] = checkState(answer3id)
+                                    Handler().postDelayed({
+                                        if (Question4 != null) {
+                                            examHolder.question4.text = Question4["text"]
+                                            examHolder.question4.show()
+                                            Handler().postDelayed({
+                                                examHolder.questionScroll.fullScroll(View.FOCUS_DOWN)
+                                            }, 100)
+                                            if (!listened.contains("audio4")) {
+                                                listened.add("audio4")
+                                                playAudio(Question4["audio"]!!, object : AudioListener {
+                                                    override fun onCompleted() {
+                                                        examHolder.answer4.show()
+                                                    }
+                                                })
+                                            }
+                                        } else checkOrFinishExam(position, examHolder)
 
-                                        },300)
-                                        examHolder.answer4.setOnCheckedChangeListener { _, answer4id ->
-                                            val id = Question4!!["id"]!!
-                                            session[id] = checkState(answer4id)
-                                            checkOrFinishExam(position,examHolder)
-                                        }
+                                    }, 300)
+                                    examHolder.answer4.setOnCheckedChangeListener { _, answer4id ->
+                                        val id = Question4!!["id"]!!
+                                        session[id] = checkState(answer4id)
+                                        checkOrFinishExam(position, examHolder)
                                     }
-
+                                }
 
 
                             }
@@ -371,7 +373,7 @@ class ExamFragment : Fragment() {
             try {
                 mediaPlayer.prepare()
             }catch (e:Exception){
-                e.printStackTrace()
+                Log.d("-------musicerror","errrrrrorrrrrrr")
             }
 
             mediaPlayer.start()
@@ -457,5 +459,3 @@ class ExamFragment : Fragment() {
 
 
 }
-
-
