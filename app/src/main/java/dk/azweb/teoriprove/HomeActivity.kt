@@ -2,12 +2,10 @@ package dk.azweb.teoriprove
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.Context
-import android.content.DialogInterface
-import android.content.Intent
-import android.content.SharedPreferences
+import android.content.*
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
+import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
@@ -98,7 +96,7 @@ class HomeActivity : AppCompatActivity() {
         Query(this).get(url,responseCallBack = object:ResponseCallBack{
             override fun onSuccess(response: String?) {
                 val data = CategoryModel(response)
-                val adapter = TestAdapter(data,this@HomeActivity,manager,this@HomeActivity)
+                val adapter = TestAdapter(data,this@HomeActivity,manager,this@HomeActivity,user)
                 testList.adapter = adapter
             }
 
@@ -248,7 +246,7 @@ class HomeActivity : AppCompatActivity() {
     }
 }
 
-class TestAdapter(val data:CategoryModel,val context:Context,val manager:FragmentManager,val realActivity: HomeActivity):RecyclerView.Adapter<TestViewHolder>(){
+class TestAdapter(val data:CategoryModel,val context:Context,val manager:FragmentManager,val realActivity: HomeActivity,val user: User?):RecyclerView.Adapter<TestViewHolder>(){
     override fun onCreateViewHolder(parent: ViewGroup, p1: Int): TestViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val view = inflater.inflate(R.layout.test_layout,parent,false)
@@ -277,48 +275,36 @@ class TestAdapter(val data:CategoryModel,val context:Context,val manager:Fragmen
             testHolder.freeText.visibility = View.VISIBLE
         else
             testHolder.freeText.visibility = View.GONE
+        Log.d("-------user",user?.payment_type.toString()+" -")
         testHolder.openTest.setOnClickListener {
-            if(id==1) {
-                val url = "http://test.azweb.dk/api/category/1"
-                Query(context).get(url,responseCallBack = object:ResponseCallBack{
-                    override fun onSuccess(response: String?) {
-                        val args = Bundle()
-                        args.putString("data", response)
-                        ExamFragment().start(args)
-                        realActivity.ActionBar.visibility = View.GONE
-                    }
-                })
+            if(id==1 || (user!=null && user.payment_type!="free")) {
+               openExam()
             }else{
-                val itemNames = arrayListOf<Any>("Sign In","Payment Plan","Continue with Free")
+                val itemNames:ArrayList<String> = if(user!=null && user.payment_type=="free")
+                    arrayListOf("Payment Plan","Continue with Free")
+                else
+                    arrayListOf("Sign In","Payment Plan","Continue with Free")
+
                 val items = itemNames.toArray(arrayOfNulls<String>(itemNames.size))
                 val dialog = AlertDialog.Builder(context)
                 dialog.setTitle("Select to continue")
                 dialog.setCancelable(true)
                 dialog.setNegativeButton(Html.fromHtml("<font color=\"#CE2828\">Cancel</font>")){_,_->}
                 dialog.setItems(items){_,item->
-                    when(item){
-                        0->{
-                            val intent = Intent(context,MainActivity::class.java)
-                            intent.putExtra("loggedIn",false)
-                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                            context.applicationContext.startActivity(intent)
+                    when (item) {
+                        0 -> {
+                            if(itemNames.size==3) openSign()
+                            else openUrl()
                         }
-                        1->{
 
+                        1 -> {
+                            if(itemNames.size==3) openUrl()
+                            else openExam()
                         }
-                        2->{
-                            val url = "http://test.azweb.dk/api/category/1"
-                            Query(context).get(url,responseCallBack = object:ResponseCallBack{
-                                override fun onSuccess(response: String?) {
-                                    val args = Bundle()
-                                    args.putString("data", response)
-                                    ExamFragment().start(args)
-                                    realActivity.ActionBar.visibility = View.GONE
-                                }
-                            })
-                        }
-                        3->{
 
+                        2 -> {
+                           if(itemNames.size==3)
+                               openExam()
                         }
                     }
                 }
@@ -327,6 +313,39 @@ class TestAdapter(val data:CategoryModel,val context:Context,val manager:Fragmen
             }
         }
 
+    }
+
+    fun openExam(){
+        val url = "http://test.azweb.dk/api/category/1"
+        Query(context).get(url,responseCallBack = object:ResponseCallBack{
+            override fun onSuccess(response: String?) {
+                val args = Bundle()
+                args.putString("data", response)
+                ExamFragment().start(args)
+                realActivity.ActionBar.visibility = View.GONE
+            }
+        })
+    }
+
+    fun openSign(){
+        val intent = Intent(context, MainActivity::class.java)
+        intent.putExtra("loggedIn", false)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        context.applicationContext.startActivity(intent)
+    }
+
+    fun openUrl(){
+        val urlString = "http://test.azweb.dk/pricing"
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(urlString))
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        intent.`package` = "com.android.chrome"
+        try {
+            context.startActivity(intent)
+        }
+        catch (ex: ActivityNotFoundException) {
+            intent.`package` = null
+            context.startActivity(intent)
+        }
     }
 
     fun Fragment.start(args:Bundle?=null){

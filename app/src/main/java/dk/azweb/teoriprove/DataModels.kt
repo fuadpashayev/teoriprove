@@ -18,12 +18,14 @@ class User(data: JSONObject?) {
     var name:String? = null
     var email:String? = null
     var access_token:String? = null
+    var payment_type:String? = null
 
     init {
         id = if(data?.has("id")!!) data.getString("id") else null
         name = if(data.has("name")) data.getString("name") else null
         email = if(data.has("email")) data.getString("email") else null
         access_token = if(data.has("access_token")) data.getString("access_token") else null
+        payment_type = if(data.has("payment_type")) data.getString("payment_type").toLowerCase() else null
     }
 
 }
