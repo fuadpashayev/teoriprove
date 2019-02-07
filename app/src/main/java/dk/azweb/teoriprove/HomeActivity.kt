@@ -48,7 +48,20 @@ class HomeActivity : AppCompatActivity() {
     val fragmentTag = "CATEGORY"
     var connectedMessage = true
     var isFromCategory = false
+    var stopped = false
     lateinit var actionBar:ConstraintLayout
+    override fun onPause() {
+        super.onPause()
+        stopped = true
+    }
+    override fun onResume() {
+        super.onResume()
+        if(stopped) {
+            val intent = Intent(this, HomeActivity::class.java)
+            startActivity(intent)
+            this.finish()
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
