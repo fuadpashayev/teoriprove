@@ -2,6 +2,7 @@ package dk.azweb.teoriprove
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.database.DataSetObserver
 import android.os.Bundle
@@ -68,11 +69,10 @@ class StatisticsViewDetailedFragment : Fragment() {
 
 
         view.backButton.setOnClickListener {
-            activity!!.onBackPressed()
-            if(isFromExam)
-                activity!!.onBackPressed()
-            if(isFromCategory)
-                activity!!.onBackPressed()
+            val intent = Intent(activity,HomeActivity::class.java)
+            intent.putExtra("backToStatistics",true)
+            startActivity(intent)
+            activity?.finish()
 
             realActivity.openedFragment = "Statistics"
         }

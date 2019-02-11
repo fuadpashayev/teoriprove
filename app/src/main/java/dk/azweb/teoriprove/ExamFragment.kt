@@ -2,10 +2,13 @@ package dk.azweb.teoriprove
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.PointF
 import android.media.MediaPlayer
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.support.v4.app.Fragment
@@ -73,7 +76,17 @@ class ExamFragment : Fragment() {
 
 
         view.backButton.setOnClickListener {
-            activity!!.onBackPressed()
+            val dialog = AlertDialog.Builder(activity)
+            dialog.setTitle("Exit from exam")
+            dialog.setMessage("Are you sure to exit from exam?")
+            dialog.setNegativeButton(Html.fromHtml("<font color=\"#3F51B5\">Cancel</font>")) { _, _ ->  }
+            dialog.setPositiveButton(Html.fromHtml("<font color=\"#3F51B5\">Exit</font>")) { _, _ ->
+                val intent = Intent(activity,HomeActivity::class.java)
+                startActivity(intent)
+                activity?.finish()
+            }
+            dialog.create().show()
+
         }
 
 
@@ -136,7 +149,7 @@ class ExamFragment : Fragment() {
             })
 
             finishExamSession.setOnClickListener {
-                finishExam()
+                finishExam(viewType)
             }
             return QuestionViewHolder(cell)
         }
@@ -150,15 +163,14 @@ class ExamFragment : Fragment() {
             currentTag = Regex(".*[\\[|,](.*)Fragment.*").replace(currentTag,"$1").trim()
             var newTag = fragment.toString()
             newTag = Regex("(.*)Fragment.*").replace(newTag,"$1")
-            if(newTag != currentTag) {
-                transaction.setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_enter, R.anim.pop_exit)
-                transaction.replace(R.id.content, fragment,newTag)
-                transaction.addToBackStack(null)
-                transaction.commit()
-                realActivity.openedFragment = newTag
-                realActivity.actionBar.visibility = View.GONE
+            transaction.setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_enter, R.anim.pop_exit)
+            transaction.replace(R.id.content, fragment,newTag)
+            transaction.addToBackStack(null)
+            transaction.commit()
+            realActivity.openedFragment = newTag
+            realActivity.actionBar.visibility = View.GONE
 
-            }
+
 
         }
 
@@ -300,8 +312,12 @@ class ExamFragment : Fragment() {
             },500)
 
 
-            examHolder.finishExam.setOnClickListener{
-                finishExam()
+//            examHolder.finishExam.setOnClickListener{
+//                finishExam(position)
+//            }
+
+            examHolder.nextExam.setOnClickListener {
+                finishExam(position,"nextExam")
             }
 
             examHolder.nextPage.setOnClickListener {
@@ -311,9 +327,12 @@ class ExamFragment : Fragment() {
         }
 
         fun checkOrFinishExam(position: Int,examHolder:View){
-            if(position==24)
-                examHolder.finishExam.show()
-            else {
+            if(position==0) {
+//                examHolder.finishExam.show()
+                examHolder.nextExam.show()
+                finishExam(position,"nextExam")
+
+            }else {
                 finishExamSession.show()
                 examHolder.nextPage.show()
             }
@@ -334,35 +353,112 @@ class ExamFragment : Fragment() {
             }
         }
 
-        fun finishExam(){
-            val dialog = AlertDialog.Builder(activity)
-            dialog.setTitle("End exam session")
-            dialog.setMessage("Are you sure to end exam session?")
-            dialog.setNegativeButton(Html.fromHtml("<font color=\"#3F51B5\">Cancel</font>")) { _, _ ->  }
-            dialog.setPositiveButton(Html.fromHtml("<font color=\"#3F51B5\">Finish</font>")) { _, _ ->
-                val data = HashMap<String,String?>()
-                data["session_id"] = session_id
-                if(user?.id!=null)
-                    data["user_id"] = user?.id
-                data["device_id"] = DEVICE_ID
-                data["answers"] = JSONObject(session).toString()
-                data["question_list"] = JSONArray(question_list).toString()
-                Answer(context).sendAnswer(data,object:ServerCallback{
-                    override fun onSuccess(result: JSONObject?) {
-                        val args = Bundle()
-                        args.putString("session_id",session_id)
-                        args.putString("user_id",user?.id)
-                        args.putString("device_id",DEVICE_ID)
-                        args.putBoolean("isFromExam",true)
-                        args.putBoolean("isFromCategory",isFromCategory)
-                        StatisticsViewDetailedFragment().start(args)
+        fun finishExam(position: Int,type:String = "finish"){
+            if(type=="finish" && position==0){
+                val args = Bundle()
+                args.putString("session_id",session_id)
+                args.putString("user_id",user?.id)
+                args.putString("device_id",DEVICE_ID)
+                args.putBoolean("isFromExam",true)
+                args.putBoolean("isFromCategory",isFromCategory)
+                sendAnswers{
+                    StatisticsViewDetailedFragment().start(args)
+                }
+            }else if(type!="finish" || position<0){
+                val dialog = AlertDialog.Builder(activity)
+                var additionalText = ""
+                if(type=="nextExam")
+                    additionalText = " and go to next exam session"
+                dialog.setTitle("Finish current exam session$additionalText")
+                dialog.setMessage("Are you sure to finish current exam session$additionalText?")
+                dialog.setNegativeButton(Html.fromHtml("<font color=\"#3F51B5\">Cancel</font>")) { _, _ ->  }
+                dialog.setNeutralButton(Html.fromHtml("<font color=\"#3F51B5\">Finish Exam</font>")) { _, _ ->
+                    finishExam(position,"finish")
+                }
+                dialog.setPositiveButton(Html.fromHtml("<font color=\"#3F51B5\">Next Exam</font>")) { _, _ ->
+                    sendAnswers {
+                        if(user != null && user?.payment_type!="free")
+                            openExam(2)
+                        else{
+                            val itemNames:ArrayList<String> = if(user!=null && user?.payment_type=="free")
+                                arrayListOf("Payment Plan")
+                            else
+                                arrayListOf("Sign In","Payment Plan")
+
+                            val items = itemNames.toArray(arrayOfNulls<String>(itemNames.size))
+                            val dialog = AlertDialog.Builder(context)
+                            dialog.setTitle("Select to continue")
+                            dialog.setCancelable(true)
+                            dialog.setNegativeButton(Html.fromHtml("<font color=\"#CE2828\">Cancel</font>")){_,_->}
+                            dialog.setItems(items){_,item->
+                                when (item) {
+                                    0 -> {
+                                        if(itemNames.size==2) openSign()
+                                        else openUrl()
+                                    }
+                                    1 -> {
+                                        if(itemNames.size==1) openUrl()
+                                    }
+                                }
+                            }
+                            dialog.create().show()
+                        }
                     }
-                    override fun onError(error: VolleyError) {
-                        Log.d("----error",error.toString()+" - ")
-                    }
-                })
+                }
+                dialog.create().show()
             }
-            dialog.create().show()
+
+        }
+
+        fun sendAnswers(callBack:()->Unit){
+            val data = HashMap<String,String?>()
+            data["session_id"] = session_id
+            if(user?.id!=null)
+                data["user_id"] = user?.id
+            data["device_id"] = DEVICE_ID
+            data["answers"] = JSONObject(session).toString()
+            data["question_list"] = JSONArray(question_list).toString()
+            Answer(context).sendAnswer(data,object:ServerCallback{
+                override fun onSuccess(result: JSONObject?) {
+                  callBack()
+                }
+                override fun onError(error: VolleyError) {
+                    Log.d("----error",error.toString()+" - ")
+                }
+            })
+        }
+
+        fun openSign(){
+            val intent = Intent(context, MainActivity::class.java)
+            intent.putExtra("loggedIn", false)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            context.applicationContext.startActivity(intent)
+        }
+
+        fun openUrl(){
+            val urlString = "http://test.azweb.dk/pricing"
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(urlString))
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            intent.`package` = "com.android.chrome"
+            try {
+                context.startActivity(intent)
+            }
+            catch (ex: ActivityNotFoundException) {
+                intent.`package` = null
+                context.startActivity(intent)
+            }
+        }
+
+        fun openExam(test_id:Int=1){
+            val url = "http://test.azweb.dk/api/category/$test_id"
+            Log.d("------exam opened",url)
+            Query(context).get(url,responseCallBack = object:ResponseCallBack{
+                override fun onSuccess(response: String?) {
+                    val args = Bundle()
+                    args.putString("data", response)
+                    ExamFragment().start(args)
+                }
+            })
         }
 
 
@@ -373,7 +469,7 @@ class ExamFragment : Fragment() {
             try {
                 mediaPlayer.prepare()
             }catch (e:Exception){
-                Log.d("-------musicerror","errrrrrorrrrrrr")
+
             }
 
             mediaPlayer.start()

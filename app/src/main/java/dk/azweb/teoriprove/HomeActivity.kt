@@ -56,7 +56,7 @@ class HomeActivity : AppCompatActivity() {
     }
     override fun onResume() {
         super.onResume()
-        if(stopped) {
+        if(stopped && openedFragment==null) {
             val intent = Intent(this, HomeActivity::class.java)
             startActivity(intent)
             this.finish()
@@ -69,6 +69,12 @@ class HomeActivity : AppCompatActivity() {
         supportActionBar!!.hide()
         sharedpreferences = getSharedPreferences(Preference, Context.MODE_PRIVATE)
         actionBar = ActionBar
+        val backToStatistics = intent?.getBooleanExtra("backToStatistics",false)
+        if(backToStatistics!!){
+            val args = Bundle()
+            args.putString("user_id", user?.id)
+            StatisticsFragment().start(args)
+        }
         val TOKEN = sharedpreferences.getString("token",null)
         if(!checkPermission())
             requestPermission()
@@ -152,47 +158,40 @@ class HomeActivity : AppCompatActivity() {
 
 
 
-    override fun onBackPressed() {
-        Log.d("------opened",openedFragment+" -")
-        when(openedFragment){
-            null -> return
-            "Statistics","Category","CategoryExaming","Examing","StatisticsFromExam"-> {
-                if(openedFragment=="CategoryExaming")
-                    super.onBackPressed()
-                if(openedFragment=="StatisticsFromExam") {
-                    super.onBackPressed()
-                    if(isFromCategory) {
-                        super.onBackPressed()
-                        isFromCategory = false
-                    }
-                    openedFragment = null
-                }
-                super.onBackPressed()
-                actionBar.show()
-                if(!isFromCategory)
-                    openedFragment = null
-            }
-            "Exam"->{
-                val dialog = AlertDialog.Builder(this)
-                dialog.setTitle("Exit from exam")
-                dialog.setMessage("Are you sure to exit from exam?")
-                dialog.setNegativeButton(Html.fromHtml("<font color=\"#3F51B5\">Cancel</font>")) { _, _ ->  }
-                dialog.setPositiveButton(Html.fromHtml("<font color=\"#3F51B5\">Exit</font>")) { _, _ ->
-                    if(isFromCategory)
-                        super.onBackPressed()
-                    super.onBackPressed()
-                    openedFragment = null
-                    actionBar.show()
-                }
-                dialog.create().show()
-            }
-            "StatisticsView","StatisticsViewDetailed"-> {
-                super.onBackPressed()
-                openedFragment = "Statistics"
-            }
-        }
-    }
+//    override fun onBackPressed() {
+//        when(openedFragment){
+//            null -> return
+//            "Statistics","Category","CategoryExaming","Examing","StatisticsFromExam"-> {
+//                val intent = Intent(this,HomeActivity::class.java)
+//                startActivity(intent)
+//                this.finish()
+//            }
+//            "Exam"->{
+//                val dialog = AlertDialog.Builder(this)
+//                dialog.setTitle("Exit from exam")
+//                dialog.setMessage("Are you sure to exit from exam?")
+//                dialog.setNegativeButton(Html.fromHtml("<font color=\"#3F51B5\">Cancel</font>")) { _, _ ->  }
+//                dialog.setPositiveButton(Html.fromHtml("<font color=\"#3F51B5\">Exit</font>")) { _, _ ->
+//                    val intent = Intent(this@HomeActivity,HomeActivity::class.java)
+//                    startActivity(intent)
+//                    this.finish()
+//                    openedFragment = null
+//                    actionBar.show()
+//                }
+//                dialog.create().show()
+//            }
+//            "StatisticsView","StatisticsViewDetailed"-> {
+//                val intent = Intent(this,HomeActivity::class.java)
+//                intent.putExtra("backToStatistics",true)
+//                startActivity(intent)
+//                this.finish()
+//            }
+//        }
+//    }
 
+    override fun onBackPressed() {
+
+    }
     fun View.show(){
         this.visibility = View.VISIBLE
     }

@@ -3,6 +3,7 @@ package dk.azweb.teoriprove
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
@@ -56,8 +57,9 @@ class StatisticsFragment : Fragment() {
         })
 
         view.backButton.setOnClickListener {
-            activity!!.onBackPressed()
-            realActivity.openedFragment = null
+            val intent = Intent(activity,HomeActivity::class.java)
+            startActivity(intent)
+            activity?.finish()
         }
 
 
