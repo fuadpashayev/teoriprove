@@ -40,6 +40,7 @@ class StatisticsViewDetailedFragment : Fragment() {
     lateinit var phoneManager: TelephonyManager
     lateinit var realActivity: HomeActivity
     var user_id:String? = null
+    var isFromExam = false
     @SuppressLint("MissingPermission")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         realActivity = (activity as HomeActivity)
@@ -47,7 +48,7 @@ class StatisticsViewDetailedFragment : Fragment() {
         phoneManager = context!!.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
         DEVICE_ID = phoneManager.deviceId
         user_id = this.arguments!!.getString("user_id")
-        val isFromExam = this.arguments!!.getBoolean("isFromExam")
+        isFromExam = this.arguments!!.getBoolean("isFromExam",false)
         val isFromCategory = this.arguments!!.getBoolean("isFromCategory")
         if(isFromExam)
             realActivity.openedFragment = "StatisticsFromExam"
@@ -70,11 +71,11 @@ class StatisticsViewDetailedFragment : Fragment() {
 
         view.backButton.setOnClickListener {
             val intent = Intent(activity,HomeActivity::class.java)
-            intent.putExtra("backToStatistics",true)
+            if(!isFromExam)
+                intent.putExtra("backToStatistics",true)
             startActivity(intent)
             activity?.finish()
-
-            realActivity.openedFragment = "Statistics"
+            activity?.overridePendingTransition(R.anim.slide_in,R.anim.slide_out)
         }
 
         return view

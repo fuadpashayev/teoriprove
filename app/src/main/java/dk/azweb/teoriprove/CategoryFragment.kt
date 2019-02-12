@@ -1,6 +1,7 @@
 package dk.azweb.teoriprove
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
 import android.support.v4.app.Fragment
@@ -48,7 +49,10 @@ class CategoryFragment : Fragment() {
         })
 
         view.backButton.setOnClickListener {
-            activity!!.onBackPressed()
+            val intent = Intent(activity,HomeActivity::class.java)
+            startActivity(intent)
+            activity?.finish()
+            activity?.overridePendingTransition(R.anim.slide_in,R.anim.slide_out)
         }
 
         return view

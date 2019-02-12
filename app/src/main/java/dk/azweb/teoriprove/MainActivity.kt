@@ -10,7 +10,6 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import kotlinx.android.synthetic.main.activity_main.*
 import org.json.JSONObject
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.os.Handler
@@ -132,17 +131,17 @@ class MainActivity : AppCompatActivity() {
 }
 
 class Profile(val context:Context){
-    fun getProfile(token:String?,serverCallback: ServerCallback){
+    fun getProfile(token:String?, errorCallback: ((VolleyError) -> Unit)? = null, successCallback: (JSONObject)->Unit){
         val queue = Volley.newRequestQueue(context)
         val url = "http://test.azweb.dk/api/auth/me"
         var message: JSONObject?
         queue.add(object : StringRequest(Request.Method.POST, url,
                 Response.Listener { response ->
                     message = JSONObject(response)
-                    serverCallback.onSuccess(message)
+                    successCallback(message!!)
                 },
                 Response.ErrorListener {
-                    serverCallback.onError(it)
+                    errorCallback?.invoke(it)
                 }
         ) {
             override fun getHeaders(): MutableMap<String, String> {
@@ -158,10 +157,6 @@ class Profile(val context:Context){
 
 
 
-interface ServerCallback {
-    fun onSuccess(result: JSONObject?)
-    fun onError(error: VolleyError)
-}
 
 
 

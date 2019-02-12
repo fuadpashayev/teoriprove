@@ -60,6 +60,7 @@ class StatisticsFragment : Fragment() {
             val intent = Intent(activity,HomeActivity::class.java)
             startActivity(intent)
             activity?.finish()
+            activity?.overridePendingTransition(R.anim.slide_in,R.anim.slide_out)
         }
 
 

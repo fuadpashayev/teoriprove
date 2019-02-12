@@ -1,6 +1,5 @@
 package dk.azweb.teoriprove
 
-import android.app.Activity
 import android.app.AlertDialog
 import android.content.*
 import android.content.pm.PackageManager
@@ -10,7 +9,6 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.support.constraint.ConstraintLayout
-import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
@@ -22,20 +20,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
-import com.android.volley.Request
-import com.android.volley.Response
-import com.android.volley.VolleyError
-import com.android.volley.toolbox.StringRequest
-import com.android.volley.toolbox.Volley
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import kotlinx.android.synthetic.main.activity_home.*
-import kotlinx.android.synthetic.main.question_layout.view.*
 import kotlinx.android.synthetic.main.test_layout.view.*
-import org.json.JSONObject
 import java.util.*
-import java.util.zip.Inflater
 import kotlin.collections.ArrayList
 
 class HomeActivity : AppCompatActivity() {
@@ -49,19 +38,30 @@ class HomeActivity : AppCompatActivity() {
     var connectedMessage = true
     var isFromCategory = false
     var stopped = false
+    var TOKEN:String? = null
     lateinit var actionBar:ConstraintLayout
+    var backToStatistics = false
+
     override fun onPause() {
         super.onPause()
         stopped = true
     }
     override fun onResume() {
         super.onResume()
+        if(user==null) {
+            sharedpreferences = getSharedPreferences("Session", Context.MODE_PRIVATE)
+            TOKEN = sharedpreferences.getString("token",null)
+            Profile(this).getProfile(TOKEN) {
+                user = User(it)
+            }
+        }
         if(stopped && openedFragment==null) {
             val intent = Intent(this, HomeActivity::class.java)
             startActivity(intent)
             this.finish()
         }
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
@@ -69,25 +69,27 @@ class HomeActivity : AppCompatActivity() {
         supportActionBar!!.hide()
         sharedpreferences = getSharedPreferences(Preference, Context.MODE_PRIVATE)
         actionBar = ActionBar
-        val backToStatistics = intent?.getBooleanExtra("backToStatistics",false)
-        if(backToStatistics!!){
+        backToStatistics = intent?.getBooleanExtra("backToStatistics",false)!!
+        if(backToStatistics){
             val args = Bundle()
             args.putString("user_id", user?.id)
             StatisticsFragment().start(args)
         }
-        val TOKEN = sharedpreferences.getString("token",null)
+        TOKEN = sharedpreferences.getString("token",null)
         if(!checkPermission())
             requestPermission()
         checkInternetConnection(networkStatus)
-        Profile(this).getProfile(TOKEN,object:ServerCallback{
-            override fun onSuccess(result: JSONObject?) {
-                user = User(result)
-                //name.text = user?.name
-            }
-            override fun onError(error: VolleyError) {
-                logout()
-            }
-        })
+        Profile(this).getProfile(TOKEN){
+            user = User(it)
+            val url = "http://test.azweb.dk/api/category"
+            Query(this).get(url,responseCallBack = object:ResponseCallBack{
+                override fun onSuccess(response: String?) {
+                    val data = CategoryModel(response)
+                    val adapter = TestAdapter(data,this@HomeActivity,manager,this@HomeActivity,user)
+                    testList.adapter = adapter
+                }
+            })
+        }
 
 
         val items = arrayListOf("Categories","Statistics")
@@ -110,16 +112,6 @@ class HomeActivity : AppCompatActivity() {
             }
             dialog.create().show()
         }
-
-        val url = "http://test.azweb.dk/api/category"
-        Query(this).get(url,responseCallBack = object:ResponseCallBack{
-            override fun onSuccess(response: String?) {
-                val data = CategoryModel(response)
-                val adapter = TestAdapter(data,this@HomeActivity,manager,this@HomeActivity,user)
-                testList.adapter = adapter
-            }
-
-        })
 
     }
 
@@ -146,7 +138,10 @@ class HomeActivity : AppCompatActivity() {
         var newTag = fragment.toString()
         newTag = Regex("(.*)Fragment.*").replace(newTag,"$1")
         if(newTag != currentTag) {
-            transaction.setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_enter, R.anim.pop_exit)
+            if(backToStatistics)
+                transaction.setCustomAnimations(0,0,0,0)
+            else
+                transaction.setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_enter, R.anim.pop_exit)
             transaction.replace(R.id.content, fragment,fragmentTag)
             transaction.addToBackStack(null)
             transaction.commit()
@@ -156,38 +151,6 @@ class HomeActivity : AppCompatActivity() {
     }
 
 
-
-
-//    override fun onBackPressed() {
-//        when(openedFragment){
-//            null -> return
-//            "Statistics","Category","CategoryExaming","Examing","StatisticsFromExam"-> {
-//                val intent = Intent(this,HomeActivity::class.java)
-//                startActivity(intent)
-//                this.finish()
-//            }
-//            "Exam"->{
-//                val dialog = AlertDialog.Builder(this)
-//                dialog.setTitle("Exit from exam")
-//                dialog.setMessage("Are you sure to exit from exam?")
-//                dialog.setNegativeButton(Html.fromHtml("<font color=\"#3F51B5\">Cancel</font>")) { _, _ ->  }
-//                dialog.setPositiveButton(Html.fromHtml("<font color=\"#3F51B5\">Exit</font>")) { _, _ ->
-//                    val intent = Intent(this@HomeActivity,HomeActivity::class.java)
-//                    startActivity(intent)
-//                    this.finish()
-//                    openedFragment = null
-//                    actionBar.show()
-//                }
-//                dialog.create().show()
-//            }
-//            "StatisticsView","StatisticsViewDetailed"-> {
-//                val intent = Intent(this,HomeActivity::class.java)
-//                intent.putExtra("backToStatistics",true)
-//                startActivity(intent)
-//                this.finish()
-//            }
-//        }
-//    }
 
     override fun onBackPressed() {
 

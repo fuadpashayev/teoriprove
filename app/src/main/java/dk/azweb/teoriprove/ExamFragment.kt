@@ -6,7 +6,6 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.graphics.PointF
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
@@ -23,12 +22,9 @@ import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
-import com.rm.rmswitch.RMTristateSwitch
 import kotlinx.android.synthetic.main.fragment_exam.view.*
 import kotlinx.android.synthetic.main.question_layout.view.*
 import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.LinearSmoothScroller
-import android.telephony.PhoneStateListener
 import android.telephony.TelephonyManager
 import android.text.Html
 import android.widget.*
@@ -84,6 +80,7 @@ class ExamFragment : Fragment() {
                 val intent = Intent(activity,HomeActivity::class.java)
                 startActivity(intent)
                 activity?.finish()
+                activity?.overridePendingTransition(R.anim.slide_in,R.anim.slide_out)
             }
             dialog.create().show()
 
@@ -141,12 +138,9 @@ class ExamFragment : Fragment() {
             DEVICE_ID = phoneManager.deviceId
 
 
-            Profile(context).getProfile(TOKEN,object: dk.azweb.teoriprove.ServerCallback {
-                override fun onSuccess(result: JSONObject?) {
-                    user = User(result)
-                }
-                override fun onError(error: VolleyError) {}
-            })
+            Profile(context).getProfile(TOKEN){
+                    user = User(it)
+            }
 
             finishExamSession.setOnClickListener {
                 finishExam(viewType)
