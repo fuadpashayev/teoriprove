@@ -64,6 +64,7 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("--------res","oncreate")
         setContentView(R.layout.activity_home)
         openedFragment = null
         supportActionBar!!.hide()
@@ -79,16 +80,11 @@ class HomeActivity : AppCompatActivity() {
         if(!checkPermission())
             requestPermission()
         checkInternetConnection(networkStatus)
-        Profile(this).getProfile(TOKEN){
+        Profile(this).getProfile(TOKEN,{
+            getTests()
+        }){
             user = User(it)
-            val url = "http://test.azweb.dk/api/category"
-            Query(this).get(url,responseCallBack = object:ResponseCallBack{
-                override fun onSuccess(response: String?) {
-                    val data = CategoryModel(response)
-                    val adapter = TestAdapter(data,this@HomeActivity,manager,this@HomeActivity,user)
-                    testList.adapter = adapter
-                }
-            })
+            getTests()
         }
 
 
@@ -115,7 +111,18 @@ class HomeActivity : AppCompatActivity() {
 
     }
 
-
+    fun getTests(){
+        val url = "http://test.azweb.dk/api/category"
+        Query(this).get(url,responseCallBack = object:ResponseCallBack{
+            override fun onSuccess(response: String?) {
+                val data = CategoryModel(response)
+                Log.d("--------res",response)
+                val adapter = TestAdapter(data,this@HomeActivity,manager,this@HomeActivity,user)
+                testList.adapter = adapter
+                loader.hide()
+            }
+        })
+    }
 
 
 

@@ -128,6 +128,8 @@ class ExamFragment : Fragment() {
         lateinit var sharedpreferences: SharedPreferences
         var question_list = datas.question_list
         val Preference = "session"
+        lateinit var examHolder:View
+        var ended = false
         @SuppressLint("MissingPermission")
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): QuestionViewHolder {
             val inflater = LayoutInflater.from(parent.context)
@@ -204,7 +206,7 @@ class ExamFragment : Fragment() {
             if(questions.size>3)
                 Question4 = questions[3]!!
 
-            val examHolder = holder.itemView
+            examHolder = holder.itemView
             val listened = arrayListOf<String>()
 
 
@@ -229,7 +231,7 @@ class ExamFragment : Fragment() {
                         }
                         examHolder.answer1.setOnCheckedChangeListener { _, answer1id ->
                             val id = Question1["id"]!!
-                            session[id] = checkState(answer1id)
+                            session[id] = checkState(answer1id,position)
                             Handler().postDelayed({
                                 examHolder.question2.text = Question2["text"]
                                 examHolder.question2.show()
@@ -247,7 +249,7 @@ class ExamFragment : Fragment() {
                             }, 300)
                             examHolder.answer2.setOnCheckedChangeListener { _, answer2id ->
                                 val id = Question2["id"]!!
-                                session[id] = checkState(answer2id)
+                                session[id] = checkState(answer2id,position)
                                 Handler().postDelayed({
                                     if (Question3 != null) {
                                         examHolder.question3.text = Question3["text"]
@@ -269,7 +271,7 @@ class ExamFragment : Fragment() {
 
                                 examHolder.answer3.setOnCheckedChangeListener { _, answer3id ->
                                     val id = Question3!!["id"]!!
-                                    session[id] = checkState(answer3id)
+                                    session[id] = checkState(answer3id,position)
                                     Handler().postDelayed({
                                         if (Question4 != null) {
                                             examHolder.question4.text = Question4["text"]
@@ -290,7 +292,7 @@ class ExamFragment : Fragment() {
                                     }, 300)
                                     examHolder.answer4.setOnCheckedChangeListener { _, answer4id ->
                                         val id = Question4!!["id"]!!
-                                        session[id] = checkState(answer4id)
+                                        session[id] = checkState(answer4id,position)
                                         checkOrFinishExam(position, examHolder)
                                     }
                                 }
@@ -324,8 +326,11 @@ class ExamFragment : Fragment() {
             if(position==0) {
 //                examHolder.finishExam.show()
                 examHolder.nextExam.show()
-                finishExam(position,"nextExam")
-
+                if(ended)
+                    finishExam(position,"nextExam",true)
+                else
+                    finishExam(position,"nextExam")
+                ended = true
             }else {
                 finishExamSession.show()
                 examHolder.nextPage.show()
@@ -335,7 +340,9 @@ class ExamFragment : Fragment() {
             }, 100)
         }
 
-        fun checkState(state:Int):Boolean{
+        fun checkState(state:Int,position: Int):Boolean{
+            if(position==0 && ended)
+                examHolder.nextExam.show()
             return when(state){
                 R.id.radioButton11,
                 R.id.radioButton21,
@@ -347,7 +354,7 @@ class ExamFragment : Fragment() {
             }
         }
 
-        fun finishExam(position: Int,type:String = "finish"){
+        fun finishExam(position: Int,type:String = "finish",endAgain:Boolean=false){
             if(type=="finish" && position==0){
                 val args = Bundle()
                 args.putString("session_id",session_id)
@@ -358,14 +365,16 @@ class ExamFragment : Fragment() {
                 sendAnswers{
                     StatisticsViewDetailedFragment().start(args)
                 }
-            }else if(type!="finish" || position<0){
+            }else if((type!="finish" || position<0) && !endAgain){
                 val dialog = AlertDialog.Builder(activity)
                 var additionalText = ""
                 if(type=="nextExam")
                     additionalText = " and go to next exam session"
                 dialog.setTitle("Finish current exam session$additionalText")
                 dialog.setMessage("Are you sure to finish current exam session$additionalText?")
-                dialog.setNegativeButton(Html.fromHtml("<font color=\"#3F51B5\">Cancel</font>")) { _, _ ->  }
+                dialog.setNegativeButton(Html.fromHtml("<font color=\"#3F51B5\">Cancel</font>")) { _, _ ->
+                    examHolder.nextExam.hide()
+                }
                 dialog.setNeutralButton(Html.fromHtml("<font color=\"#3F51B5\">Finish Exam</font>")) { _, _ ->
                     finishExam(position,"finish")
                 }
